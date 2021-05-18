@@ -43,10 +43,10 @@ def plot_det_curves(fnfpth_list):
     for ax in g.axes.flat:
         ax.set_xticks(tick_locations)
         ax.set_xticklabels(tick_labels)
-        ax.set_xlim(-4, 3)
+        ax.set_xlim(-3.5, 1)
         ax.set_yticks(tick_locations)
         ax.set_yticklabels(tick_labels)
-        ax.set_ylim(-4, 3)
+        ax.set_ylim(-3.5, 0.5)
         col = ax.get_title().split(' = ')[1].lower()
         print(col)
         h, lines = ax.get_legend_handles_labels()

@@ -12,14 +12,14 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/wiebket/sveva",
-    license="GPL-3.0-or-later"
+    license="GPL-3.0-or-later",
     classifiers=[
         "Programming Language :: Python :: 3",
         "Development Status :: 2 - Pre-Alpha",
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Natural Language :: English",
     ],
-    package_dir={"": "sveva"},
     packages=setuptools.find_packages(where="sveva"),
+    py_modules = ['sveva.voxceleb','sveva.evaluate','sveva.plot'],
     python_requires=">=3.6",
 )
