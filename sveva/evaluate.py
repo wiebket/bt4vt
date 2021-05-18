@@ -135,7 +135,6 @@ def fnfpth(df, **kwargs):
         for gen in ref_gender:
             try:
                 sg_fnfpth, sg_metrics = _eval_subgroup(df, {'ref_nationality':nat,'ref_gender':gen})
-                print('Creating subgroup filtered by: ', nat, ' ', gen)
                 fnfpth_list.append(sg_fnfpth)
                 sg_name = sg_fnfpth['subgroup'].unique()[0]
                 all_metrics[sg_name] = sg_metrics
@@ -146,32 +145,3 @@ def fnfpth(df, **kwargs):
     all_fnfpth = pd.concat(fnfpth_list)
 
     return all_fnfpth, all_metrics
-
-
-
-def mincdet_fnfp(fnfpth_list):
-    """
-    Calculate the normalised false negative and false positive rates at the threshold value where:
-    1) the SUBGROUP cost detection function is at a minimum
-    2) the OVERALL cost detection function is at a minimum
-    """
-
-    data = fnfpth_list[0]
-    metrics = fnfpth_list[1]
-    mincdet_fnfp = {}
-
-    for sg, val in metrics.items():
-
-        #1) find the index in data (fnfpth[0]) that is closest to the SUBGROUP minimum threshold value
-        sg_threshold_diff = np.array([abs(i - metrics[sg]['min_cdet_threshold']) for i in data[data['subgroup']==sg]['thresholds']])
-        sg_mincdet_threshold_fnrs = sp.stats.norm.ppf(data[data['subgroup']==sg]['fnrs'])[np.ndarray.argmin(sg_threshold_diff)]
-        sg_mincdet_threshold_fprs = sp.stats.norm.ppf(data[data['subgroup']==sg]['fprs'])[np.ndarray.argmin(sg_threshold_diff)]
-
-        #2) find the index in data (fnfpth[0]) that is closest to the OVERALL minimum threshold value
-        oa_threshold_diff = np.array([abs(i - metrics['all']['min_cdet_threshold']) for i in data[data['subgroup']==sg]['thresholds']])
-        oa_mincdet_threshold_fnrs = sp.stats.norm.ppf(data[data['subgroup']==sg]['fnrs'])[np.ndarray.argmin(oa_threshold_diff)]
-        oa_mincdet_threshold_fprs = sp.stats.norm.ppf(data[data['subgroup']==sg]['fprs'])[np.ndarray.argmin(oa_threshold_diff)]
-
-        mincdet_fnfp[sg] = {'subgroup':[sg_mincdet_threshold_fnrs, sg_mincdet_threshold_fprs], 'all':[oa_mincdet_threshold_fnrs, oa_mincdet_threshold_fprs]}
-
-    return mincdet_fnfp

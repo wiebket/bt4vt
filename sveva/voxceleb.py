@@ -66,5 +66,29 @@ def voxceleb_scores_with_demographics(score_file, meta_file, **kwargs):
 
     demo_df['same_gen'] = np.where(demo_df['ref_gender']==demo_df['com_gender'], 1, 0)
     demo_df['same_nat'] = np.where(demo_df['ref_nationality']==demo_df['com_nationality'], 1, 0)
+    demo_df['same_sg'] = np.where((demo_df['ref_gender']==demo_df['com_gender']) & 
+                                  (demo_df['ref_nationality']==demo_df['com_nationality']), 1, 0)
 
     return demo_df
+
+
+
+def summarise_df(demo_df):
+    """
+    This function creates a multi-index ['ref_nationality','ref_gender'] dataframe with the following columns:
+    - count of unique speakers (unique_speakers)
+    - mean utterances per speaker (utterances_speaker)
+    - percentage of verification pairs in the same subgroup (same_subgroup)
+    
+    arguments:
+    demo_df [dataframe]: dataframe object in the format of output of voxceleb_scores_with_demographics
+    """
+    
+    df = demo_df.groupby(['ref_nationality','ref_gender']).agg({'ref_vggface1':'nunique','lab':'count','same_sg':'sum'})
+    df['same_sg'] = round(df['same_sg']/df['lab'],3)*100
+    df['lab'] = round(df['lab']/df['ref_vggface1'],1)
+    df.rename({'ref_vggface1':'unique_speakers',
+              'lab':'utterances_speaker',
+              'same_sg':'same_subgroup'}, inplace=True, axis='columns')
+    
+    return df
