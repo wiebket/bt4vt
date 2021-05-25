@@ -13,9 +13,14 @@ import scipy as sp
 
 def voxceleb_scores_with_demographics(score_file, meta_file, **kwargs):
     """
+    ARGUMENTS
+    ---------
     score_file [str]: path to file with scores
     meta_file [str]: path to file with demographic metadata
-    **kwargs: passed to pd.read_csv() 
+    **kwargs: optional, passed to pandas.read_csv() 
+    
+    OUTPUT
+    ------
     """
 
     # Get the scores for each pair of segments
@@ -80,8 +85,12 @@ def summarise_df(demo_df):
     - mean utterances per speaker (utterances_speaker)
     - percentage of verification pairs in the same subgroup (same_subgroup)
     
-    arguments:
-    demo_df [dataframe]: dataframe object in the format of output of voxceleb_scores_with_demographics
+    ARGUMENTS
+    ---------
+    demo_df [dataframe]: pandas dataframe object in the format of output of voxceleb_scores_with_demographics
+    
+    OUTPUT
+    ------
     """
     
     df = demo_df.groupby(['ref_nationality','ref_gender']).agg({'ref_vggface1':'nunique','lab':'count','same_sg':'sum'})

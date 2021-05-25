@@ -19,6 +19,10 @@ def norm_mincdet_fnfp(fnfpth_list):
     Calculate the normalised false negative and false positive rates at the threshold value where:
     1) the SUBGROUP cost detection function is at a minimum
     2) the OVERALL cost detection function is at a minimum
+    
+    ARGUMENTS
+    ---------
+    fnfpth_list [list]: output of sveva.evaluate.fnfpth [all_fnfpth dataframe, all_metrics dictionary]
     """
 
     data = fnfpth_list[0]
@@ -43,24 +47,37 @@ def norm_mincdet_fnfp(fnfpth_list):
 
 
 
-def plot_det_curves(fnfpth_list):
+def plot_det_curves(fnfpth_list, **kwargs):
     """
     
+    ARGUMENTS
+    ---------
+    fnfpth_list [list]: output of sveva.evaluate.fnfpth [all_fnfpth dataframe, all_metrics dictionary] OR a list with a dataframe
+    **kwargs: valid options: hue, style and col. Passed to seaborn.relplot()
     """
 
     df = fnfpth_list[0]
+    kwargs_hue = kwargs.get('hue', None)
+    kwargs_style = kwargs.get('style', None)
+    kwargs_col = kwargs.get('col', None)
+    try:
+        n_kwargs_col = len(df[kwargs_col].unique())
+        n_col_wrap = 3 if n_kwargs_col >=3 else n_kwargs_col
+    except KeyError:
+        n_col_wrap = None
 
     sns.set_context(context='notebook', font_scale=1)
     sns.set_style('ticks')
 
     g = sns.relplot(x=sp.stats.norm.ppf(df['fprs']), 
                     y=sp.stats.norm.ppf(df['fnrs']), 
-                    hue='ref_gender',
-                    style='ref_gender',
-                    col='ref_nationality',
-                    col_wrap=3,
+                    hue=kwargs_hue,
+                    style=kwargs_style,
+                    col=kwargs_col,
+                    col_wrap=n_col_wrap,
                     height=4, aspect=1.3, linewidth=2.5,
                     kind='line', 
+                    facet_kws=dict(sharex=False,sharey=False),
                     data=df)
 
     ticks = [0.001, 0.01, 0.05, 0.20, 0.5, 0.80, 0.95, 0.99, 0.999]
@@ -70,8 +87,6 @@ def plot_det_curves(fnfpth_list):
       for s in ticks
     ]
 
-    p = norm_mincdet_fnfp(fnfpth_list)
-
     for ax in g.axes.flat:
         ax.set_xticks(tick_locations)
         ax.set_xticklabels(tick_labels)
@@ -79,23 +94,59 @@ def plot_det_curves(fnfpth_list):
         ax.set_yticks(tick_locations)
         ax.set_yticklabels(tick_labels)
         ax.set_ylim(-3.5, 0.5)
-        col = ax.get_title().split(' = ')[1].lower()
-        h, lines = ax.get_legend_handles_labels()
-        for l in lines:
-            sg = col+'_'+l #TO DO: Looks like lines only returns an object once
-            try:
-                ax.scatter(x=p[sg]['all'][1], y=p[sg]['all'][0], c='black', s=75, marker='^')
-                ax.scatter(x=p[sg]['subgroup'][1], y=p[sg]['subgroup'][0], c='black', s=100, marker='*')
-            except:
-                pass
-        ax.scatter(x=p['all']['all'][1], y=p['all']['all'][0], label='system threshold', c='black', s=75, marker='^')
-        ax.plot(sp.stats.norm.ppf(df[df['subgroup']=='all']['fprs']), 
-                sp.stats.norm.ppf(df[df['subgroup']=='all']['fnrs']), 
-                c='k', ls='dotted')
 
     g.set_xlabels('false positive rate')
     g.set_ylabels('false negative rate')
 
-    #legend = plt.legend(loc='upper right')
+    return g
 
+
+
+def plot_det_baseline(g, fnfpth_list):
+    """
+    Add a baseline DET curve to every DET curve subplot of an existing seaborn FacetGrid.
+    
+    ARGUMENTS
+    ---------
+    g [FacetGrid]: created for example with plot_det_curves()
+    fnfpth_list [list]: output of sveva.evaluate.fnfpth [all_fnfpth dataframe, all_metrics dictionary] OR a list with a dataframe    
+    """
+    
+    df = fnfpth_list[0]
+    p = norm_mincdet_fnfp(fnfpth_list)
+    
+    for ax in g.axes.flat:
+        ax.plot(sp.stats.norm.ppf(df[df['subgroup']=='all']['fprs']), 
+                sp.stats.norm.ppf(df[df['subgroup']=='all']['fnrs']), 
+                c='k', ls='dotted')
+        ax.scatter(x=p['all']['all'][1], y=p['all']['all'][0], label='system threshold', c='black', s=75, marker='^')
+    
+    return g
+
+
+
+def plot_thresholds(g, fnfpth_list): #TO DO: change to thresholds
+    """
+    Add system and subgroup thresholds to every DET curve subplot of an existing seaborn FacetGrid.
+    
+    ARGUMENTS
+    ---------
+    g [FacetGrid]: created for example with plot_det_curves()
+    fnfpth_list [list]: output of sveva.evaluate.fnfpth [all_fnfpth dataframe, all_metrics dictionary] OR a list with a dataframe    
+    """
+
+    
+    lines = [i.get_text() for i in g._legend.texts]
+    colours = [i.get_color() for i in g._legend.get_lines()]
+
+    for ax in g.axes.flat:
+        col, val = ax.get_title().split(' = ')
+        for i in range(0, len(lines)):
+            sg = val.lower()+'_'+lines[i]
+            try:
+                ax.scatter(x=p[sg]['all'][1], y=p[sg]['all'][0], c=np.array([colours[i]]), s=75, marker='^')
+                ax.scatter(x=p[sg]['subgroup'][1], y=p[sg]['subgroup'][0], c=np.array([colours[i]]), s=100, marker='x')
+            except:
+                pass
+        
     return g

@@ -77,8 +77,8 @@ def _eval_subgroup(df, group_filter: dict, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_
     if len(sg)>0:
         sg_eval = _evaluate_sv(sg['sc'], sg['lab'], dcf_p_target, dcf_c_fn, dcf_c_fp)
         sg_fnfpth = pd.DataFrame(data={'fnrs':sg_eval[0],
-                                        'fprs':sg_eval[1],
-                                        'thresholds':sg_eval[2]})
+                                       'fprs':sg_eval[1],
+                                       'thresholds':sg_eval[2]})
 
         sg_fnfpth['subgroup'] = '_'.join(i 
                                       for i in [''.join(v.split()).lower() 
@@ -104,13 +104,25 @@ def fnfpth(df, **kwargs):
     """
     This function returns false negative rates, false positive rates and the 
     corresponding threshold values for scores in dataset df. 
-
-    Possible kwargs:
+    
+    ARGUMENTS
+    ---------
+    df [dataframe]:
+        df['sc']: scores
+        df['lab']: binary labels (0=False, 1=True)
+    
+    valid **kwargs
+    --------------
     ref_nationality [list]: one or more unique reference nationalities in df
     ref_gender [list]: one or more unique reference genders in df
     dcf_p_target [float]: detection cost function target (default = 0.05)
     dcf_c_fn [float]: detection cost function false negative weight (default = 1)
     dcf_c_fp [float]: detection cost function  false positive weight (default = 1)
+    
+    OUTPUT
+    ------
+    all_fnfpth [dataframe]:
+    all_metrics [dictionary]:
     """
 
     # Get ref_nationality, ref_gender from keyword arguments. Use all unique values if not specified.
