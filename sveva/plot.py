@@ -167,6 +167,6 @@ def plot_thresholds(g, fnfpth, metrics, threshold_type, **kwargs): #TO DO: chang
         for li in lines:
             norm_fnfp = _norm_fnfp_min_threshold(fnfpth[fnfpth[filter_by_1]==li], metrics[li][threshold_type])
             g.axes[0][0].scatter(x=norm_fnfp[0], y=norm_fnfp[1], label=threshold_type+' for '+li, 
-                                 c=np.array(line_colors[li]), s=75, marker='^')
+                                 c=np.array([line_colors[li]]), s=75, marker='^')
         
     return g
