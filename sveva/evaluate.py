@@ -100,7 +100,7 @@ def _eval_subgroup(df, group_filter: dict, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_
     
     
     
-def fnfpth(df, **kwargs):
+def fnfpth(df, **kwargs): #TO DO: generalise to group_filter: dict
     """
     This function returns false negative rates, false positive rates and the 
     corresponding threshold values for scores in dataset df. 
@@ -141,7 +141,7 @@ def fnfpth(df, **kwargs):
                          )
 
     fnfpth_list = [pd.DataFrame(data={'fnrs':eval_all[0], 'fprs':eval_all[1], 'thresholds':eval_all[2], 'subgroup':'all'})]
-    all_metrics = {'all':{'min_cdet':eval_all[3],'min_cdet_threshold':eval_all[4],'eer':eval_all[5],'eer_threshold':eval_all[6]}}
+    metrics = {'all':{'min_cdet':eval_all[3],'min_cdet_threshold':eval_all[4],'eer':eval_all[5],'eer_threshold':eval_all[6]}}
 
     for nat in ref_nationality:
         for gen in ref_gender:
@@ -149,11 +149,11 @@ def fnfpth(df, **kwargs):
                 sg_fnfpth, sg_metrics = _eval_subgroup(df, {'ref_nationality':nat,'ref_gender':gen})
                 fnfpth_list.append(sg_fnfpth)
                 sg_name = sg_fnfpth['subgroup'].unique()[0]
-                all_metrics[sg_name] = sg_metrics
+                metrics[sg_name] = sg_metrics
             except TypeError as e:
                 print('Failed to filter by: ', nat, ' ', gen, ': ', e)
                 pass
 
-    all_fnfpth = pd.concat(fnfpth_list)
+    fnfpth = pd.concat(fnfpth_list)
 
-    return all_fnfpth, all_metrics
+    return fnfpth, metrics
