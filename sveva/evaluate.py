@@ -55,52 +55,58 @@ def _evaluate_sv(sc, lab, dcf_p_target, dcf_c_fn, dcf_c_fp):
 
 
 
-def _subgroup(df, group_filter: dict):
+def _subgroup(df, filter_dict:dict):
     """
-    Filter scores by a demographic subgroup.
+    Filter dataframe by a demographic subgroup.
+    
+    ARGUMENTS
+    ---------
+    df [dataframe]: 
+    group_filter [dict]:
+    
+    OUTPUT
+    ------
     """
 
-    filters = ' & '.join([f"{k}=='{v}'" for k, v in group_filter.items()])
+    filters = ' & '.join([f"{k}=='{v}'" for k, v in filter_dict.items()])
     sg = df.query(filters)
 
-    return(sg[['sc','lab']+list(group_filter.keys())])
+    return(sg[['sc','lab']+list(filter_dict.keys())])
 
 
 
-def _eval_subgroup(df, group_filter: dict, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
+def fnfpth_metrics(df, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
     """
     Calculate 
+    
+    ARGUMENTS
+    ---------
+    df [dataframe]: results dataframe with columns ['sc'] (scores), ['lab'] (labels)
+    dcf_p_target [float]:
+    dcf_c_fn [float]:
+    dcf_c_fp [float]:
+    
+    OUTPUT
+    ------
+    
     """
 
-    sg = _subgroup(df, group_filter)
+    if len(df)>0:
+        df_eval = _evaluate_sv(df['sc'], df['lab'], dcf_p_target, dcf_c_fn, dcf_c_fp)
+        df_fnfpth = pd.DataFrame(data={'fnrs':df_eval[0],
+                                       'fprs':df_eval[1],
+                                       'thresholds':df_eval[2]})
+        
+        df_metrics = {'min_cdet':df_eval[3],'min_cdet_threshold':df_eval[4],'eer':df_eval[5],'eer_threshold':df_eval[6]}       
 
-    if len(sg)>0:
-        sg_eval = _evaluate_sv(sg['sc'], sg['lab'], dcf_p_target, dcf_c_fn, dcf_c_fp)
-        sg_fnfpth = pd.DataFrame(data={'fnrs':sg_eval[0],
-                                       'fprs':sg_eval[1],
-                                       'thresholds':sg_eval[2]})
-
-        sg_fnfpth['subgroup'] = '_'.join(i 
-                                      for i in [''.join(v.split()).lower() 
-                                      for v in group_filter.values()])
-
-        for key, value in group_filter.items():
-            sg_fnfpth[key] = value
-
-            sg_metrics = {}
-            sg_metrics['min_cdet'] = sg_eval[3]
-            sg_metrics['min_cdet_threshold'] = sg_eval[4]
-            sg_metrics['eer'] = sg_eval[5]
-            sg_metrics['eer_threshold'] = sg_eval[6]
-
-        return(sg_fnfpth, sg_metrics)
+        return(df_fnfpth, df_metrics)
 
     else:
         return(None)  #TO DO: silent pass --> consider response
     
     
     
-def fnfpth(df, **kwargs): #TO DO: generalise to group_filter: dict
+def sg_fnfpth_metrics(df, filter_keys:list, **kwargs): #TO DO: generalise to group_filter: dict
     """
     This function returns false negative rates, false positive rates and the 
     corresponding threshold values for scores in dataset df. 
@@ -110,50 +116,82 @@ def fnfpth(df, **kwargs): #TO DO: generalise to group_filter: dict
     df [dataframe]:
         df['sc']: scores
         df['lab']: binary labels (0=False, 1=True)
+    filter_keys [list]:
     
     valid **kwargs
     --------------
-    ref_nationality [list]: one or more unique reference nationalities in df
-    ref_gender [list]: one or more unique reference genders in df
     dcf_p_target [float]: detection cost function target (default = 0.05)
     dcf_c_fn [float]: detection cost function false negative weight (default = 1)
     dcf_c_fp [float]: detection cost function  false positive weight (default = 1)
     
     OUTPUT
     ------
-    all_fnfpth [dataframe]:
-    all_metrics [dictionary]:
+    fnfpth [dataframe]:
+    metrics [dictionary]:
     """
 
-    # Get ref_nationality, ref_gender from keyword arguments. Use all unique values if not specified.
-    ref_nationality = kwargs.get('ref_nationality', list(df['ref_nationality'].unique()))
-    ref_gender = kwargs.get('ref_gender', list(df['ref_gender'].unique()))
-    #assert that ref_nationality, ref_gender are lists
-    ref_nationality.sort()
-    ref_gender.sort()
+    filter_dict = {}
+    
+    for f_key in filter_keys:
+        f_vals = list(df[f_key].unique())
+        f_vals.sort()
+        filter_dict[f_key] = f_vals
 
-    # Get fnrs, fprs, thresholds for all values
-    eval_all = _evaluate_sv(df['sc'], 
-                         df['lab'], 
-                         dcf_p_target=kwargs.get('dcf_p_target',0.05),
-                         dcf_c_fn=kwargs.get('dcf_c_fn',1),
-                         dcf_c_fp=kwargs.get('dcf_c_fp',1)
-                         )
+    filter_items = []
 
-    fnfpth_list = [pd.DataFrame(data={'fnrs':eval_all[0], 'fprs':eval_all[1], 'thresholds':eval_all[2], 'subgroup':'all'})]
-    metrics = {'all':{'min_cdet':eval_all[3],'min_cdet_threshold':eval_all[4],'eer':eval_all[5],'eer_threshold':eval_all[6]}}
+    for val0 in filter_dict[filter_keys[0]]:
+        try:
+            for val1 in filter_dict[filter_keys[1]]:
+                try:
+                    for val2 in filter_dict[filter_keys[2]]:
+                        f_item = {filter_keys[0]:val0, filter_keys[1]:val1, filter_keys[2]:val2}
+                        filter_items.append(f_item)
+                except IndexError:
+                    f_item = {filter_keys[0]:val0, filter_keys[1]:val1}
+                    filter_items.append(f_item)
+        except IndexError:
+            f_item = {filter_keys[0]:val0}
+            filter_items.append(f_item)
 
-    for nat in ref_nationality:
-        for gen in ref_gender:
-            try:
-                sg_fnfpth, sg_metrics = _eval_subgroup(df, {'ref_nationality':nat,'ref_gender':gen})
-                fnfpth_list.append(sg_fnfpth)
-                sg_name = sg_fnfpth['subgroup'].unique()[0]
-                metrics[sg_name] = sg_metrics
-            except TypeError as e:
-                print('Failed to filter by: ', nat, ' ', gen, ': ', e)
-                pass
+    fnfpth_list = []
+    metrics = {}
+
+    for fi in filter_items:
+        try:
+            sg = _subgroup(df, fi)
+            sg_fnfpth, sg_metrics = fnfpth_metrics(sg)
+            for key, val in fi.items():
+                sg_fnfpth[key] = val
+            fnfpth_list.append(sg_fnfpth)
+            sg_name = '_'.join([v.replace(" ", "").lower() for v in fi.values()])
+            metrics[sg_name] = sg_metrics
+        except:
+            print('Failed to filter by: ', fi.values())
+            pass
 
     fnfpth = pd.concat(fnfpth_list)
 
-    return fnfpth, metrics
+    return(fnfpth, metrics)
+
+
+
+def compare_experiments(experiment_dict:dict, comparison:str):
+    """
+    
+    ARGUMENTS
+    ---------
+    
+    """
+    
+    compare_df = []
+    compare_metrics = {}
+    
+    for k, v in experiment_dict.items():
+        df = v[0]
+        df[comparison] = k
+        compare_metrics[k] = v[1]
+        compare_df.append(df)
+    
+    compare_fnfpth = pd.concat(compare_df)
+    
+    return compare_fnfpth, compare_metrics

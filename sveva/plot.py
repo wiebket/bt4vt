@@ -46,12 +46,13 @@ def plot_det_curves(fnfpth, **kwargs):
     ---------
     fnfpth [dataframe]: dataframe, must contain false negative rates ['fnrs'] and false positive rates ['fprs']. 
                         If **kwargs are specified, then dataframe must contain columns with names used for values in hue, style and col (see below)
-    **kwargs: valid options: hue, style and col. Passed to seaborn.relplot()
+    **kwargs: valid options: hue, style, col and palette. Passed to seaborn.relplot()
     """
 
     kwargs_hue = kwargs.get('hue', None)
     kwargs_style = kwargs.get('style', None)
     kwargs_col = kwargs.get('col', None)
+    kwargs_palette= kwargs.get('palette', 'colorblind')
     try:
         n_kwargs_col = len(fnfpth[kwargs_col].unique())
         n_col_wrap = 3 if n_kwargs_col >=3 else n_kwargs_col
@@ -67,6 +68,7 @@ def plot_det_curves(fnfpth, **kwargs):
                     style=kwargs_style,
                     col=kwargs_col,
                     col_wrap=n_col_wrap,
+                    palette=kwargs_palette,
                     height=4, aspect=1.3, linewidth=2.5,
                     kind='line', 
                     facet_kws=dict(sharex=False,sharey=False),
@@ -94,7 +96,7 @@ def plot_det_curves(fnfpth, **kwargs):
 
 
 
-def plot_det_baseline(g, fnfpth_baseline, threshold, **kwargs):
+def plot_det_baseline(g, fnfpth_baseline, metrics_baseline, threshold_type, **kwargs):
     """
     Add a baseline DET curve to every DET curve subplot of an existing seaborn FacetGrid.
     
@@ -102,7 +104,7 @@ def plot_det_baseline(g, fnfpth_baseline, threshold, **kwargs):
     ---------
     g [FacetGrid]: created for example with plot_det_curves()
     fnfpth_baseline [dataframe]: dataframe, must contain false negative rates ['fnrs'], false positive rates ['fprs'] and threshold values ['thresholds']
-    threshold [float]: score at threshold 'min_cdet_threshold' or 'eer_threshold'  
+    threshold_value [float]: score at threshold 'min_cdet_threshold' or 'eer_threshold'  
     **kwargs: valid options: c (colour='black'), s (size=75), marker (='^'), label (='threshold'). Passed to g.axes.flat.scatter()
     
     OUTPUT
@@ -110,7 +112,7 @@ def plot_det_baseline(g, fnfpth_baseline, threshold, **kwargs):
     FacetGrid object with baseline added
     """
     
-    norm_fnfp = _norm_fnfp_min_threshold(fnfpth_baseline, threshold)
+    norm_fnfp = _norm_fnfp_min_threshold(fnfpth_baseline, metrics_baseline[threshold_type])
     
     kwargs_c = kwargs.get('c', 'black')
     kwargs_s = kwargs.get('s', 75)
@@ -125,7 +127,7 @@ def plot_det_baseline(g, fnfpth_baseline, threshold, **kwargs):
 
 
 
-def plot_thresholds(g, fnfpth, metrics, threshold_type, **kwargs): #TO DO: change to thresholds
+def plot_thresholds(g, fnfpth, metrics, threshold_type, metrics_baseline=None, **kwargs): #TO DO: change to thresholds
     """
     Add system and subgroup thresholds to every DET curve subplot of an existing seaborn FacetGrid.
     
@@ -152,12 +154,12 @@ def plot_thresholds(g, fnfpth, metrics, threshold_type, **kwargs): #TO DO: chang
             for li in lines:
                 try:
                     sg_norm_fnfp = _norm_fnfp_min_threshold(fnfpth[(fnfpth[filter_by_1]==li) & (fnfpth[filter_by_2]==col)],
-                                                            metrics[col.lower()+'_'+li][threshold_type])
+                                                            metrics[col.replace(" ", "").lower()+'_'+li][threshold_type])
                     subplot.scatter(x=sg_norm_fnfp[0], y=sg_norm_fnfp[1], label=threshold_type+' for '+col.lower()+'_'+li, 
                                     c=np.array([line_colors[li]]), s=kwargs_s, marker=kwargs_marker)
 
                     all_norm_fnfp = _norm_fnfp_min_threshold(fnfpth[(fnfpth[filter_by_1]==li) & (fnfpth[filter_by_2]==col)],
-                                                             metrics['all'][threshold_type])
+                                                             metrics_baseline[threshold_type])
                     subplot.scatter(x=all_norm_fnfp[0], y=all_norm_fnfp[1], label=threshold_type+' for all', 
                                     c=np.array([line_colors[li]]), s=75, marker='^')
                 except:
