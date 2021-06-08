@@ -144,7 +144,9 @@ def plot_thresholds(g, fnfpth, metrics, threshold_type, metrics_baseline=None, *
     #TO DO: update to work for multi-level legend (i.e. hue & style). At the moment only works for hue & multi-column
 
     filter_by_1 = g.legend.get_title().get_text()
-    colors = [list(i.get_c()) for i in g.legend.get_lines()]
+    colors = [i.get_c() for i in g.legend.get_lines()]
+    if type(colors[0]) is tuple:
+        colors = [np.array([c]) for c in colors]
     lines = [i.get_text() for i in g.legend.get_texts()] 
     line_colors = dict(zip(lines, colors))
     
@@ -156,12 +158,12 @@ def plot_thresholds(g, fnfpth, metrics, threshold_type, metrics_baseline=None, *
                     sg_norm_fnfp = _norm_fnfp_min_threshold(fnfpth[(fnfpth[filter_by_1]==li) & (fnfpth[filter_by_2]==col)],
                                                             metrics[col.replace(" ", "").lower()+'_'+li][threshold_type])
                     subplot.scatter(x=sg_norm_fnfp[0], y=sg_norm_fnfp[1], label=threshold_type+' for '+col.lower()+'_'+li, 
-                                    c=np.array([line_colors[li]]), s=kwargs_s, marker=kwargs_marker)
+                                    c=line_colors[li], s=kwargs_s, marker=kwargs_marker)
 
                     all_norm_fnfp = _norm_fnfp_min_threshold(fnfpth[(fnfpth[filter_by_1]==li) & (fnfpth[filter_by_2]==col)],
                                                              metrics_baseline[threshold_type])
                     subplot.scatter(x=all_norm_fnfp[0], y=all_norm_fnfp[1], label=threshold_type+' for all', 
-                                    c=np.array([line_colors[li]]), s=75, marker='^')
+                                    c=line_colors[li], s=75, marker='^')
                 except:
                     pass
                 
@@ -169,6 +171,6 @@ def plot_thresholds(g, fnfpth, metrics, threshold_type, metrics_baseline=None, *
         for li in lines:
             norm_fnfp = _norm_fnfp_min_threshold(fnfpth[fnfpth[filter_by_1]==li], metrics[li][threshold_type])
             g.axes[0][0].scatter(x=norm_fnfp[0], y=norm_fnfp[1], label=threshold_type+' for '+li, 
-                                 c=np.array([line_colors[li]]), s=75, marker='^')
+                                 c=line_colors[li], s=75, marker='^')
         
     return g
