@@ -75,38 +75,39 @@ def _subgroup(df, filter_dict:dict):
 
 
 
-def fnfpth_metrics(df, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
+def fpfnth_metrics(df, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
     """
     Calculate 
     
     ARGUMENTS
     ---------
     df [dataframe]: results dataframe with columns ['sc'] (scores), ['lab'] (labels)
-    dcf_p_target [float]:
-    dcf_c_fn [float]:
-    dcf_c_fp [float]:
+    dcf_p_target [float]: detection cost function target (default = 0.05)
+    dcf_c_fn [float]: detection cost function false negative weight (default = 1)
+    dcf_c_fp [float]: detection cost function  false positive weight (default = 1)
     
     OUTPUT
     ------
-    
+    fpfnth [dataframe]:
+    metrics [dictionary]:
     """
 
     if len(df)>0:
         df_eval = _evaluate_sv(df['sc'], df['lab'], dcf_p_target, dcf_c_fn, dcf_c_fp)
-        df_fnfpth = pd.DataFrame(data={'fnrs':df_eval[0],
+        df_fpfnth = pd.DataFrame(data={'fnrs':df_eval[0],
                                        'fprs':df_eval[1],
                                        'thresholds':df_eval[2]})
         
         df_metrics = {'min_cdet':df_eval[3],'min_cdet_threshold':df_eval[4],'eer':df_eval[5],'eer_threshold':df_eval[6]}       
 
-        return(df_fnfpth, df_metrics)
+        return(df_fpfnth, df_metrics)
 
     else:
         return(None)  #TO DO: silent pass --> consider response
     
     
     
-def sg_fnfpth_metrics(df, filter_keys:list, **kwargs): #TO DO: generalise to group_filter: dict
+def sg_fpfnth_metrics(df, filter_keys:list, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
     """
     This function returns false negative rates, false positive rates and the 
     corresponding threshold values for scores in dataset df. 
@@ -117,16 +118,13 @@ def sg_fnfpth_metrics(df, filter_keys:list, **kwargs): #TO DO: generalise to gro
         df['sc']: scores
         df['lab']: binary labels (0=False, 1=True)
     filter_keys [list]:
-    
-    valid **kwargs
-    --------------
     dcf_p_target [float]: detection cost function target (default = 0.05)
     dcf_c_fn [float]: detection cost function false negative weight (default = 1)
     dcf_c_fp [float]: detection cost function  false positive weight (default = 1)
     
     OUTPUT
     ------
-    fnfpth [dataframe]:
+    fpfnth [dataframe]:
     metrics [dictionary]:
     """
 
@@ -153,25 +151,110 @@ def sg_fnfpth_metrics(df, filter_keys:list, **kwargs): #TO DO: generalise to gro
             f_item = {filter_keys[0]:val0}
             filter_items.append(f_item)
 
-    fnfpth_list = []
+    fpfnth_list = []
     metrics = {}
 
     for fi in filter_items:
         try:
             sg = _subgroup(df, fi)
-            sg_fnfpth, sg_metrics = fnfpth_metrics(sg)
+            sg_fpfnth, sg_metrics = fpfnth_metrics(sg, dcf_p_target, dcf_c_fn, dcf_c_fp)
             for key, val in fi.items():
-                sg_fnfpth[key] = val
-            fnfpth_list.append(sg_fnfpth)
+                sg_fpfnth[key] = val
+            fpfnth_list.append(sg_fpfnth)
             sg_name = '_'.join([v.replace(" ", "").lower() for v in fi.values()])
             metrics[sg_name] = sg_metrics
         except:
             print('Failed to filter by: ', fi.values())
             pass
 
-    fnfpth = pd.concat(fnfpth_list)
+    fpfnth = pd.concat(fpfnth_list)
 
-    return(fnfpth, metrics)
+    return(fpfnth, metrics)
+
+
+
+def fpfn_min_threshold(df, threshold, ppf_norm=False):
+    """
+    Calculate the false positive rate (FPR) and false negative rate (FNR) at the minimum threshold value.
+    
+    ARGUMENTS
+    ---------
+    df [dataframe]: dataframe, must contain false negative rates ['fnrs'], false positive rates ['fprs'] and threshold values ['thresholds']
+    threshold [float]: score at threshold 'min_cdet_threshold' or 'eer_threshold'
+    ppf_norm [bool]: normalise the FNR and FPR values to the percent point function (default = False)
+    
+    OUTPUT
+    ------
+    list: [FPR, FNR] at minimum threshold value
+    """
+
+    # Find the index in df that is closest to the SUBGROUP minimum threshold value
+    sg_threshold_diff = np.array([abs(i - threshold) for i in df['thresholds']])
+    
+    if ppf_norm == True:
+        min_threshold_fpr = sp.stats.norm.ppf(df['fprs'])[np.ndarray.argmin(sg_threshold_diff)]
+        min_threshold_fnr = sp.stats.norm.ppf(df['fnrs'])[np.ndarray.argmin(sg_threshold_diff)]
+    else:
+        min_threshold_fpr = df['fprs'].iloc[np.ndarray.argmin(sg_threshold_diff)]  
+        min_threshold_fnr = df['fnrs'].iloc[np.ndarray.argmin(sg_threshold_diff)]      
+
+    norm_threshold = [min_threshold_fpr, min_threshold_fnr]
+
+    return norm_threshold
+
+
+
+def cdet_diff(fpfnth, metrics, metrics_baseline, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
+    
+    fpfn_list = []
+    for k in metrics.keys():
+
+        # Calculate cdet of subgroup at the overall minimum threshold value
+        sg = k.split('_')
+        sg_fpfnth = fpfnth[(fpfnth['ref_nationality'].apply(lambda x: x.replace(" ", "").lower())==sg[0]) & 
+                              (fpfnth['ref_gender']==sg[1])]
+        fpfn_overall_min_cdet = fpfn_min_threshold(sg_fpfnth, metrics_baseline['min_cdet_threshold'])
+        sg_cdet_overall_min = fpfn_overall_min_cdet[0]*dcf_c_fp*(1-dcf_p_target) + fpfn_overall_min_cdet[1]*dcf_c_fn*dcf_p_target        
+ 
+        fpfn_list.append([k, sg_cdet_overall_min, metrics[k]['min_cdet']])
+
+    fpfn_df = pd.DataFrame(fpfn_list, columns=['subgroup','sg_cdet_overall_min','sg_min_cdet'])
+    
+    # Calculate cdet ratios for subgroups
+    fpfn_df['overall_cdet_diff'] = fpfn_df['sg_cdet_overall_min']/metrics_baseline['min_cdet']
+    fpfn_df['sg_cdet_diff'] = fpfn_df['sg_min_cdet']/fpfn_df['sg_cdet_overall_min']    
+    
+    return fpfn_df
+
+
+
+def fpfn_diff(fpfnth, metrics, metrics_baseline, threshold_type):
+    
+    fpfn_list = []
+    for k in metrics.keys():
+        
+        # Calculate FPR/FNR at the overall minimum threshold value
+        overall_min_cdet = fpfn_min_threshold(fpfnth, metrics_baseline[threshold_type])
+
+        # Calculate FPR/FNR of subgroup at the overall minimum threshold value
+        sg = k.split('_')
+        sg_fpfnth = fpfnth[(fpfnth['ref_nationality'].apply(lambda x: x.replace(" ", "").lower())==sg[0]) & 
+                              (fpfnth['ref_gender']==sg[1])]
+        sg_overall_min_cdet = fpfn_min_threshold(sg_fpfnth, metrics_baseline[threshold_type])
+        
+        # Calculate FPR/FNR of subgroup at the subgroup minimum threshold value
+        sg_min_cdet = fpfn_min_threshold(sg_fpfnth, metrics[k][threshold_type])
+
+        fpfn_list.append([k, sg_overall_min_cdet[0], sg_overall_min_cdet[1], sg_min_cdet[0], sg_min_cdet[1]])
+
+    fpfn_df = pd.DataFrame(fpfn_list, columns=['subgroup','overall_fpr','overall_fnr','sg_fpr','sg_fnr'])
+    
+    fpfn_df['overall_fpr_diff'] = fpfn_df['overall_fpr']/overall_min_cdet[0]
+    fpfn_df['overall_fnr_diff'] = fpfn_df['overall_fnr']/overall_min_cdet[1]
+    fpfn_df['sg_fpr_diff'] = fpfn_df['sg_fpr']/fpfn_df['overall_fpr']
+    fpfn_df['sg_fnr_diff'] = fpfn_df['sg_fnr']/fpfn_df['overall_fnr']
+    
+    return fpfn_df
 
 
 
@@ -180,7 +263,11 @@ def compare_experiments(experiment_dict:dict, comparison:str):
     
     ARGUMENTS
     ---------
+    experiment_dict [dict]: key:[fpfnth dataframe, metrics dict]
+    comparison [str]:
     
+    OUTPUT
+    ------
     """
     
     compare_df = []
@@ -192,6 +279,6 @@ def compare_experiments(experiment_dict:dict, comparison:str):
         compare_metrics[k] = v[1]
         compare_df.append(df)
     
-    compare_fnfpth = pd.concat(compare_df)
+    compare_fpfnth = pd.concat(compare_df)
     
-    return compare_fnfpth, compare_metrics
+    return compare_fpfnth, compare_metrics
