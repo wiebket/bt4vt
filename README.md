@@ -1,4 +1,4 @@
-# SVEva Fair: EVAluating fairness of Speaker Verification components
+# SVEva Fair: EVAluating fairness of Speaker Verification
 
 ## About this package
 
