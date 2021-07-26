@@ -73,6 +73,7 @@ def voxceleb_scores_with_demographics(score_file, meta_file, **kwargs):
     demo_df['same_nat'] = np.where(demo_df['ref_nationality']==demo_df['com_nationality'], 1, 0)
     demo_df['same_sg'] = np.where((demo_df['ref_gender']==demo_df['com_gender']) & 
                                   (demo_df['ref_nationality']==demo_df['com_nationality']), 1, 0)
+    demo_df['subgroup'] = ['_'.join(z) for z in zip(demo_df['ref_nationality'].apply(lambda x: x.replace(" ", "").lower()), demo_df['ref_gender'])]
 
     return demo_df
 
@@ -93,11 +94,12 @@ def summarise_df(demo_df):
     ------
     """
     
-    df = demo_df.groupby(['ref_nationality','ref_gender']).agg({'ref_vggface1':'nunique','lab':'count','same_sg':'sum'})
+    df = demo_df.groupby(['subgroup','ref_nationality','ref_gender']).agg({'ref_vggface1':'nunique','lab':'count','same_sg':'sum'})
     df['same_sg'] = round(df['same_sg']/df['lab'],3)*100
     df['lab'] = round(df['lab']/df['ref_vggface1'],1)
     df.rename({'ref_vggface1':'unique_speakers',
               'lab':'utterances_speaker',
               'same_sg':'same_subgroup'}, inplace=True, axis='columns')
+    df.reset_index(inplace=True)
     
     return df

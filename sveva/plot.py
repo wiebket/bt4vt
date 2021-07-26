@@ -22,13 +22,14 @@ def plot_det_curves(fpfnth, **kwargs):
     ---------
     fpfnth [dataframe]: dataframe, must contain false negative rates ['fnrs'] and false positive rates ['fprs']. 
                         If **kwargs are specified, then dataframe must contain columns with names used for values in hue, style and col (see below)
-    **kwargs: valid options: hue, style, col and palette. Passed to seaborn.relplot()
+    **kwargs: valid options: hue, style, col, palette and linewidth. Passed to seaborn.relplot()
     """
 
     kwargs_hue = kwargs.get('hue', None)
     kwargs_style = kwargs.get('style', None)
     kwargs_col = kwargs.get('col', None)
     kwargs_palette= kwargs.get('palette', 'colorblind')
+    kwargs_lw = kwargs.get('linewidth', 2)
     try:
         n_kwargs_col = len(fpfnth[kwargs_col].unique())
         n_col_wrap = 3 if n_kwargs_col >=3 else n_kwargs_col
@@ -42,7 +43,8 @@ def plot_det_curves(fpfnth, **kwargs):
                     col=kwargs_col,
                     col_wrap=n_col_wrap,
                     palette=kwargs_palette,
-                    height=4, aspect=1.3, linewidth=2.5,
+                    linewidth= kwargs_lw,
+                    height=4, aspect=1.3, 
                     kind='line', 
                     facet_kws=dict(sharex=False,sharey=False),
                     data=fpfnth)
@@ -62,8 +64,7 @@ def plot_det_curves(fpfnth, **kwargs):
         ax.set_yticklabels(tick_labels)
         ax.set_ylim(-3.5, 0.5)
 
-    g.set_xlabels('false positive rate')
-    g.set_ylabels('false negative rate')
+    g.set_axis_labels('false positive rate', 'false negative rate', labelpad=10)
 
     return g
 
@@ -82,7 +83,7 @@ def plot_det_baseline(g, fpfnth_baseline, metrics_baseline, threshold_type, **kw
     
     OUTPUT
     ------
-    FacetGrid object with baseline added
+    Returns FacetGrid object with baseline added
     """
     
     norm_fpfn = fpfn_min_threshold(fpfnth_baseline, metrics_baseline[threshold_type], ppf_norm=True)
@@ -100,25 +101,35 @@ def plot_det_baseline(g, fpfnth_baseline, metrics_baseline, threshold_type, **kw
 
 
 
-def plot_thresholds(g, fpfnth, metrics, threshold_type, metrics_baseline=None, **kwargs): #TO DO: change to thresholds
+def plot_thresholds(g, fpfnth, metrics, threshold_type, min_threshold=['subgroup','overall'], metrics_baseline=None, **kwargs): #TO DO: change to thresholds
     """
-    Add system and subgroup thresholds to every DET curve subplot of an existing seaborn FacetGrid.
+    Add subgroup and overall thresholds at minimium threshold_type to every DET curve subplot of an existing seaborn FacetGrid.
     
     ARGUMENTS
     ---------
     g [FacetGrid]: created for example with plot_det_curves()
-    fpfnth_list [list]: output of sveva.evaluate.fpfnth [all_fpfnth dataframe, all_metrics dictionary] OR a list with a dataframe   
-    **kwargs: valid options: s (size=75), marker (='^'). Passed to g.axes.flat.scatter()
+    fpfnth [dataframe]: output of sveva.evaluate.fpfnth [all_fpfnth dataframe, all_metrics dictionary] OR a list with a dataframe   
+    metrics []:
+    threshold_type []:
+    metrics_baseline []:
+    min_threshold [list]: valid items are 'subgroup', 'overall'. Plot thresholds at subgroup and overall minimum threshold value respectively.
+    **kwargs: valid options: s (size=100), marker (='x'). Passed to g.axes.flat.scatter()
+    
+    OUTPUT
+    ------    
+    Returns FacetGrid object with thresholds added
     """
     
     kwargs_s = kwargs.get('s', 100)
     kwargs_marker = kwargs.get('marker', 'x')
     
+    assert isinstance(min_threshold, list), 'type min_threshold must be list'
+    
     #TO DO: update to work for multi-level legend (i.e. hue & style). At the moment only works for hue & multi-column
 
     filter_by_1 = g.legend.get_title().get_text()
     colors = [i.get_c() for i in g.legend.get_lines()]
-    if type(colors[0]) is tuple:
+    if type(colors[0]) is not str:
         colors = [np.array([c]) for c in colors]
     lines = [i.get_text() for i in g.legend.get_texts()] 
     line_colors = dict(zip(lines, colors))
@@ -128,22 +139,38 @@ def plot_thresholds(g, fpfnth, metrics, threshold_type, metrics_baseline=None, *
             filter_by_2 = subplot.get_title().split(' = ')[0]
             for li in lines:
                 try:
-                    sg_norm_fpfn = fpfn_min_threshold(fpfnth[(fpfnth[filter_by_1]==li) & (fpfnth[filter_by_2]==col)],
-                                                            metrics[col.replace(" ", "").lower()+'_'+li][threshold_type], ppf_norm=True)
-                    subplot.scatter(x=sg_norm_fpfn[0], y=sg_norm_fpfn[1], label=threshold_type+' for '+col.lower()+'_'+li, 
-                                    c=line_colors[li], s=kwargs_s, marker=kwargs_marker)
-
-                    all_norm_fpfn = fpfn_min_threshold(fpfnth[(fpfnth[filter_by_1]==li) & (fpfnth[filter_by_2]==col)],
-                                                             metrics_baseline[threshold_type], ppf_norm=True)
-                    subplot.scatter(x=all_norm_fpfn[0], y=all_norm_fpfn[1], label=threshold_type+' for all', 
-                                    c=line_colors[li], s=75, marker='^')
+                    if 'subgroup' in min_threshold:
+                        metrics_key = [key for key in [key for key in metrics.keys() if li.replace(" ", "").lower() in key.lower()
+                                                      ] if col.replace(" ", "").lower() in key.lower()]
+                        sg_fpfn_min_cdet = fpfn_min_threshold(fpfnth[(fpfnth[filter_by_1]==li) & (fpfnth[filter_by_2]==col)],
+                                                                metrics[metrics_key[0]][threshold_type], ppf_norm=True)
+                        subplot.scatter(x=sg_fpfn_min_cdet[0], y=sg_fpfn_min_cdet[1], label=threshold_type+' for '+col.lower()+'_'+li, 
+                                        c=line_colors[li], s=kwargs_s, marker=kwargs_marker)
+                        
+                    if 'overall' in min_threshold:
+                        sg_fpfn_overall_min_cdet = fpfn_min_threshold(fpfnth[(fpfnth[filter_by_1]==li) & (fpfnth[filter_by_2]==col)],
+                                                                 metrics_baseline[threshold_type], ppf_norm=True)
+                        subplot.scatter(x=sg_fpfn_overall_min_cdet[0], y=sg_fpfn_overall_min_cdet[1], label=threshold_type+' for all', 
+                                        c=line_colors[li], s=75, marker='^')
                 except:
                     pass
                 
     else:
         for li in lines:
-            norm_fpfn = fpfn_min_threshold(fpfnth[fpfnth[filter_by_1]==li], metrics[li][threshold_type], ppf_norm=True)
-            g.axes[0][0].scatter(x=norm_fpfn[0], y=norm_fpfn[1], label=threshold_type+' for '+li, 
+            fpfn_overall_min_cdet = fpfn_min_threshold(fpfnth[fpfnth[filter_by_1]==li], metrics[li][threshold_type], ppf_norm=True)
+            g.axes[0][0].scatter(x=fpfn_overall_min_cdet[0], y=fpfn_overall_min_cdet[1], label=threshold_type+' for '+li, 
                                  c=line_colors[li], s=75, marker='^')
         
     return g
+
+
+
+def plot_score_distribution():
+    
+    return
+
+
+
+def plot_cdet_ratios():
+    
+    return

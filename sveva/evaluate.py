@@ -160,11 +160,11 @@ def sg_fpfnth_metrics(df, filter_keys:list, dcf_p_target=0.05, dcf_c_fn=1, dcf_c
             sg_fpfnth, sg_metrics = fpfnth_metrics(sg, dcf_p_target, dcf_c_fn, dcf_c_fp)
             for key, val in fi.items():
                 sg_fpfnth[key] = val
-            fpfnth_list.append(sg_fpfnth)
             sg_name = '_'.join([v.replace(" ", "").lower() for v in fi.values()])
+            sg_fpfnth['subgroup'] = sg_name
+            fpfnth_list.append(sg_fpfnth)
             metrics[sg_name] = sg_metrics
         except:
-            print('Failed to filter by: ', fi.values())
             pass
 
     fpfnth = pd.concat(fpfnth_list)
@@ -204,31 +204,31 @@ def fpfn_min_threshold(df, threshold, ppf_norm=False):
 
 
 
-def cdet_diff(fpfnth, metrics, metrics_baseline, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
+def cdet_ratio(fpfnth, metrics, metrics_baseline, filter_keys:list, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
     
     fpfn_list = []
     for k in metrics.keys():
 
         # Calculate cdet of subgroup at the overall minimum threshold value
         sg = k.split('_')
-        sg_fpfnth = fpfnth[(fpfnth['ref_nationality'].apply(lambda x: x.replace(" ", "").lower())==sg[0]) & 
-                              (fpfnth['ref_gender']==sg[1])]
-        fpfn_overall_min_cdet = fpfn_min_threshold(sg_fpfnth, metrics_baseline['min_cdet_threshold'])
-        sg_cdet_overall_min = fpfn_overall_min_cdet[0]*dcf_c_fp*(1-dcf_p_target) + fpfn_overall_min_cdet[1]*dcf_c_fn*dcf_p_target        
+        sg_fpfnth = fpfnth[(fpfnth[filter_keys[0]].apply(lambda x: x.replace(" ", "").lower())==sg[0]) & 
+                              (fpfnth[filter_keys[1]]==sg[1])]
+        sg_fpfn_overall_min_cdet = fpfn_min_threshold(sg_fpfnth, metrics_baseline['min_cdet_threshold'])
+        sg_cdet_overall_min = sg_fpfn_overall_min_cdet[0]*dcf_c_fp*(1-dcf_p_target) + sg_fpfn_overall_min_cdet[1]*dcf_c_fn*dcf_p_target        
  
         fpfn_list.append([k, sg_cdet_overall_min, metrics[k]['min_cdet']])
 
     fpfn_df = pd.DataFrame(fpfn_list, columns=['subgroup','sg_cdet_overall_min','sg_min_cdet'])
     
     # Calculate cdet ratios for subgroups
-    fpfn_df['overall_cdet_diff'] = fpfn_df['sg_cdet_overall_min']/metrics_baseline['min_cdet']
-    fpfn_df['sg_cdet_diff'] = fpfn_df['sg_min_cdet']/fpfn_df['sg_cdet_overall_min']    
+    fpfn_df['overall_cdet_ratio'] = fpfn_df['sg_cdet_overall_min']/metrics_baseline['min_cdet']
+    fpfn_df['sg_cdet_ratio'] = fpfn_df['sg_min_cdet']/fpfn_df['sg_cdet_overall_min']    
     
     return fpfn_df
 
 
 
-def fpfn_diff(fpfnth, metrics, metrics_baseline, threshold_type):
+def fpfn_ratio(fpfnth, metrics, metrics_baseline, filter_keys:list, threshold_type):
     
     fpfn_list = []
     for k in metrics.keys():
@@ -238,21 +238,21 @@ def fpfn_diff(fpfnth, metrics, metrics_baseline, threshold_type):
 
         # Calculate FPR/FNR of subgroup at the overall minimum threshold value
         sg = k.split('_')
-        sg_fpfnth = fpfnth[(fpfnth['ref_nationality'].apply(lambda x: x.replace(" ", "").lower())==sg[0]) & 
-                              (fpfnth['ref_gender']==sg[1])]
-        sg_overall_min_cdet = fpfn_min_threshold(sg_fpfnth, metrics_baseline[threshold_type])
+        sg_fpfnth = fpfnth[(fpfnth[filter_keys[0]].apply(lambda x: x.replace(" ", "").lower())==sg[0]) & 
+                              (fpfnth[filter_keys[1]]==sg[1])]
+        sg_fpfn_overall_min_cdet = fpfn_min_threshold(sg_fpfnth, metrics_baseline[threshold_type])
         
         # Calculate FPR/FNR of subgroup at the subgroup minimum threshold value
-        sg_min_cdet = fpfn_min_threshold(sg_fpfnth, metrics[k][threshold_type])
+        sg_fpfn_min_cdet = fpfn_min_threshold(sg_fpfnth, metrics[k][threshold_type])
 
-        fpfn_list.append([k, sg_overall_min_cdet[0], sg_overall_min_cdet[1], sg_min_cdet[0], sg_min_cdet[1]])
+        fpfn_list.append([k, sg_fpfn_overall_min_cdet[0], sg_fpfn_overall_min_cdet[1], sg_fpfn_min_cdet[0], sg_fpfn_min_cdet[1]])
 
     fpfn_df = pd.DataFrame(fpfn_list, columns=['subgroup','overall_fpr','overall_fnr','sg_fpr','sg_fnr'])
     
-    fpfn_df['overall_fpr_diff'] = fpfn_df['overall_fpr']/overall_min_cdet[0]
-    fpfn_df['overall_fnr_diff'] = fpfn_df['overall_fnr']/overall_min_cdet[1]
-    fpfn_df['sg_fpr_diff'] = fpfn_df['sg_fpr']/fpfn_df['overall_fpr']
-    fpfn_df['sg_fnr_diff'] = fpfn_df['sg_fnr']/fpfn_df['overall_fnr']
+    fpfn_df['overall_fpr_ratio'] = fpfn_df['overall_fpr']/sg_fpfn_overall_min_cdet[0]
+    fpfn_df['overall_fnr_ratio'] = fpfn_df['overall_fnr']/sg_fpfn_overall_min_cdet[1]
+    fpfn_df['sg_fpr_ratio'] = fpfn_df['sg_fpr']/fpfn_df['overall_fpr']
+    fpfn_df['sg_fnr_ratio'] = fpfn_df['sg_fnr']/fpfn_df['overall_fnr']
     
     return fpfn_df
 
@@ -282,3 +282,36 @@ def compare_experiments(experiment_dict:dict, comparison:str):
     compare_fpfnth = pd.concat(compare_df)
     
     return compare_fpfnth, compare_metrics
+
+
+def score_overlap(df, metrics):
+    """
+    Algorithm to calculate FP-FN overlap area for each subgroup
+
+    For each subgroup:
+        Lookup the equal error rate threshold
+        Find min score where lab = 1
+        Find max score where lab = 0
+        If lab = 1:
+            Count scores where min_score <= score <= eer
+        If lab = 0:
+            Count scores where eer <= score <= max_score
+        Sum the overlap counts
+        Calculate probability ratio = overlap instances / total instances
+    """
+
+    score_overlap = {}
+
+    for subgroup in list(df['subgroup'].unique()):
+        eer_threshold = metrics[subgroup]['eer_threshold']
+        min_sc = df[(df['subgroup']==subgroup) & (df['lab']==1)]['sc'].min()
+        max_sc = df[(df['subgroup']==subgroup) & (df['lab']==0)]['sc'].max()
+        overlap_fn = df[(df['subgroup']==subgroup) & (df['lab']==1) & (df['sc'] >= min_sc) & (df['sc'] <= eer_threshold)]['sc'].count()
+        overlap_fp = df[(df['subgroup']==subgroup) & (df['lab']==0) & (df['sc'] >= eer_threshold) & (df['sc'] <= max_sc)]['sc'].count()
+        overlap_total = overlap_fn + overlap_fp
+        total_instances = df[df['subgroup']==subgroup]['sc'].count()
+        overlap_probability = overlap_total / total_instances
+        
+        score_overlap[subgroup] = overlap_probability
+        
+    return score_overlap
