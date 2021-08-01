@@ -81,8 +81,8 @@ def _subgroup(df, filter_dict:dict):
 
 def fpfnth_metrics(df, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
     """
-    This function returns false negative rates, false positive rates and the 
-    corresponding threshold values for scores in dataset df.  
+    This function returns false negative rates, false positive rates and the corresponding 
+    threshold values for scores in dataset df.  
     
     ARGUMENTS
     ---------
@@ -95,8 +95,8 @@ def fpfnth_metrics(df, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
     
     OUTPUT
     ------
-    fpfnth [dataframe]:
-    metrics [dictionary]:
+    fpfnth [dataframe]: dataframe with the following columns: 'fnrs','fprs','thresholds'
+    metrics [dictionary]: minimum detection cost and equal error rate metrics
     """
 
     if len(df)>0:
@@ -134,8 +134,8 @@ def sg_fpfnth_metrics(df, filter_keys:list, dcf_p_target=0.05, dcf_c_fn=1, dcf_c
     
     OUTPUT
     ------
-    fpfnth [dataframe]:
-    metrics [dictionary]:
+    fpfnth [dataframe]: dataframe with the following columns: 'fnrs','fprs','thresholds','subgroup'
+    metrics [dictionary]: minimum detection cost and equal error rate metrics for each subgroup
     """
 
     # Create a dictionary to construct subgroups from filter_keys {filter_key: [unique filter_key values], }
