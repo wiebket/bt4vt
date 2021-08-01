@@ -11,7 +11,7 @@ SVEva Fair equips you to interrogate your speaker verification models to answer 
 
 Full details on SVEva Fair and a case study that evaluates the fairness of benchmark models trained with the VoxCeleb Trainer benchmark are available here:
 
-*Toussaint, W. and Ding, A. 2021. “SVEva Fair: A Framework for Evaluating Fairness in Speaker Verification.”* 
+*Toussaint, W. and Ding, A. 2021. “SVEva Fair: A Framework for Evaluating Fairness in Speaker Verification.”, https://arxiv.org/abs/2107.12049* 
 
 ### Fair Speaker Evaluation
 
