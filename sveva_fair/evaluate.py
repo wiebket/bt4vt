@@ -14,8 +14,7 @@ import sklearn.metrics as sklearn_metrics
 
 def _compute_min_cdet(fnrs, fprs, thresholds, dcf_p_target, dcf_c_fn, dcf_c_fp):
     """
-    Compute the minimum of the detection cost function as defined in the 
-    NIST Speaker Recognition Evaluation Plan 2019.
+    Compute the minimum of the detection cost function as defined in the NIST Speaker Recognition Evaluation Plan 2019.
     """
 
     cdet = np.array([fnr*dcf_c_fn*dcf_p_target for fnr in fnrs]) + np.array([fpr*dcf_c_fp*(1-dcf_p_target) for fpr in fprs])
@@ -57,15 +56,20 @@ def _evaluate_sv(sc, lab, dcf_p_target, dcf_c_fn, dcf_c_fp):
 
 def _subgroup(df, filter_dict:dict):
     """
-    Filter dataframe by a demographic subgroup.
+    Filter dataframe df by a demographic subgroup defined by filter_dict.
     
     ARGUMENTS
     ---------
-    df [dataframe]: 
-    group_filter [dict]:
+    df [dataframe]: dataframe with speaker verification predictions that has columns:
+                    df['sc']: scores
+                    df['lab']: binary labels (0=False, 1=True)
+    filter_dict [dict]: filter specifying column names and unique values by which to filter
+                    e.g. {'nationality':'India', 'sex':'female'} will select all rows where
+                    df['nationality']=='India' and df['sex']=='female'
     
     OUTPUT
     ------
+    Subgroup dataframe with prediction scores ['sc'], labels ['lab'] and filter columns
     """
 
     filters = ' & '.join([f"{k}=='{v}'" for k, v in filter_dict.items()])
@@ -77,11 +81,14 @@ def _subgroup(df, filter_dict:dict):
 
 def fpfnth_metrics(df, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
     """
-    Calculate 
+    This function returns false negative rates, false positive rates and the 
+    corresponding threshold values for scores in dataset df.  
     
     ARGUMENTS
     ---------
-    df [dataframe]: results dataframe with columns ['sc'] (scores), ['lab'] (labels)
+    df [dataframe]: dataframe with speaker verification predictions that has columns:
+                    df['sc']: scores
+                    df['lab']: binary labels (0=False, 1=True)
     dcf_p_target [float]: detection cost function target (default = 0.05)
     dcf_c_fn [float]: detection cost function false negative weight (default = 1)
     dcf_c_fp [float]: detection cost function  false positive weight (default = 1)
@@ -103,21 +110,24 @@ def fpfnth_metrics(df, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
         return(df_fpfnth, df_metrics)
 
     else:
-        return(None)  #TO DO: silent pass --> consider response
+        return(None)  #TODO: silent pass --> consider response
     
     
     
 def sg_fpfnth_metrics(df, filter_keys:list, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
     """
-    This function returns false negative rates, false positive rates and the 
-    corresponding threshold values for scores in dataset df. 
+    This function returns false negative rates, false positive rates and threshold values 
+    for subgroups in dataframe df. Subgroups are defined by the column names specified in 
+    the filter_keys argument.
     
     ARGUMENTS
     ---------
-    df [dataframe]:
-        df['sc']: scores
-        df['lab']: binary labels (0=False, 1=True)
-    filter_keys [list]:
+    df [dataframe]: dataframe with speaker verification predictions that has columns:
+                    df['sc']: scores
+                    df['lab']: binary labels (0=False, 1=True)
+    filter_keys [list]: list of column names in df that define subgroups, e.g. ['nationality','sex'] 
+                    Creates subgroups from all unique value pairs in the designated columns. Currently
+                    supports lists with 1, 2 or 3 items.
     dcf_p_target [float]: detection cost function target (default = 0.05)
     dcf_c_fn [float]: detection cost function false negative weight (default = 1)
     dcf_c_fp [float]: detection cost function  false positive weight (default = 1)
@@ -128,6 +138,7 @@ def sg_fpfnth_metrics(df, filter_keys:list, dcf_p_target=0.05, dcf_c_fn=1, dcf_c
     metrics [dictionary]:
     """
 
+    # Create a dictionary to construct subgroups from filter_keys {filter_key: [unique filter_key values], }
     filter_dict = {}
     
     for f_key in filter_keys:
@@ -135,7 +146,10 @@ def sg_fpfnth_metrics(df, filter_keys:list, dcf_p_target=0.05, dcf_c_fn=1, dcf_c
         f_vals.sort()
         filter_dict[f_key] = f_vals
 
-    filter_items = []
+    # Create a list of dictionaries of potential subgroups from all combinations of values in filter_dict
+    # [{filter_keys[0]: filter_keys[0] first unique value, filter_keys[1]: filter_keys[1] first unique value}, 
+    #  {filter_keys[0]: filter_keys[0] second unique value, filter_keys[1]: filter_keys[1] first unique value}, ...]
+    filter_items = [] 
 
     for val0 in filter_dict[filter_keys[0]]:
         try:
