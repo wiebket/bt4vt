@@ -72,5 +72,5 @@ g = sveva_plot.plot_det_curves(sg_fpfnth, hue='sex', style='sex', col='nationali
 g = sveva_plot.plot_det_baseline(g, all_fpfnth, all_metrics, threshold_type='min_cdet_threshold')
 g = sveva_plot.plot_thresholds(g, sg_fpfnth, sg_metrics, threshold_type='min_cdet_threshold', metrics_baseline=all_metrics)
 ```
-FIG
+<img src="/examples/figures/resnetse34v2_det_nationality.png" alt="example DET curves" width="200" height="150" align="center"/>  
 
