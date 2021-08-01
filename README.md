@@ -33,7 +33,7 @@ import sveva_fair.plot as sveva_plot
 ```
 
 ## Usage
-Below is an example for using SVEva Fair. All code and data for reproducing the example are contained in the [\example](\example) directory. The example evaluates the fairness of models released with the [VoxCeleb Trainer]().
+Below is an example for using SVEva Fair. All code and data for reproducing the example are contained in the [example](example) directory. The example evaluates the fairness of models released with the <a href="https://github.com/clovaai/voxceleb_trainer" target="_blank">VoxCeleb Trainer</a>.
 
 ### Evaluate speaker verification performance across subgroups
 
