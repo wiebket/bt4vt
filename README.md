@@ -33,7 +33,7 @@ import sveva_fair.plot as sveva_plot
 ```
 
 ## Usage
-Below is an example for using SVEva Fair. All code and data for reproducing the example are contained in the [example](example) directory. The example evaluates the fairness of models released with the <a href="https://github.com/clovaai/voxceleb_trainer" target="_blank">VoxCeleb Trainer</a>.
+Below is an example for using SVEva Fair. All code and data for reproducing the example are contained in the [example](example) directory. The example evaluates the fairness of models released with the <a href="https://github.com/clovaai/voxceleb_trainer" target="_blank">VoxCeleb Trainer</a> benchmark.
 
 ### Evaluate speaker verification performance across subgroups
 
@@ -70,7 +70,17 @@ dcf_c_fp [float]: detection cost function  false positive weight (default = 1)
 ```
 g = sveva_plot.plot_det_curves(sg_fpfnth, hue='sex', style='sex', col='nationality') 
 g = sveva_plot.plot_det_baseline(g, all_fpfnth, all_metrics, threshold_type='min_cdet_threshold')
-g = sveva_plot.plot_thresholds(g, sg_fpfnth, sg_metrics, threshold_type='min_cdet_threshold', metrics_baseline=all_metrics)
+g = sveva_plot.plot_thresholds(g, sg_fpfnth, sg_metrics, threshold_type='min_cdet_threshold', 
+                                metrics_baseline=all_metrics)
 ```
-<img src="/examples/figures/resnetse34v2_det_nationality.png" alt="example DET curves" width="200" height="150" align="center"/>  
+<img src="example/figures/resnetse34v2_det_nationality.png" alt="example DET curves" height=220 align="centre"/>  
+
+```
+g = sveva_plot.plot_det_curves(sg_fpfnth, hue='nationality', col='sex', linewidth=1.25,
+                               palette=cc.glasbey_category10[:len(sg_fpfnth['nationality'].unique())]) 
+g = sveva_plot.plot_det_baseline(g, all_fpfnth, all_metrics, 'min_cdet_threshold')
+g = sveva_plot.plot_thresholds(g, all_fpfnth, all_metrics, 'min_cdet_threshold', min_threshold=['overall'], 
+                                metrics_baseline=all_metrics)
+```
+<img src="example/figures/resnetse34v2_det_sex.png" alt="example DET curves" height=220 align="centre"/>  
 
