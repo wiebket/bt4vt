@@ -13,9 +13,16 @@ import sklearn.metrics as sklearn_metrics
 
 
 def _compute_min_cdet(fnrs, fprs, thresholds, dcf_p_target, dcf_c_fn, dcf_c_fp):
-    """
-    Compute the minimum of the detection cost function as defined in the NIST Speaker Recognition Evaluation Plan 2019.
-    """
+    """Compute the minimum of the detection cost function as defined in the NIST Speaker Recognition Evaluation Plan 2019.
+
+    Args:
+        fnrs ([type]): [description]
+        fprs ([type]): [description]
+        thresholds ([type]): [description]
+        dcf_p_target ([type]): [description]
+        dcf_c_fn ([type]): [description]
+        dcf_c_fp ([type]): [description]
+    """    
 
     cdet = np.array([fnr*dcf_c_fn*dcf_p_target for fnr in fnrs]) + np.array([fpr*dcf_c_fp*(1-dcf_p_target) for fpr in fprs])
     min_ix = np.nanargmin(cdet)
@@ -27,12 +34,20 @@ def _compute_min_cdet(fnrs, fprs, thresholds, dcf_p_target, dcf_c_fn, dcf_c_fp):
 
 
 def _evaluate_sv(sc, lab, dcf_p_target, dcf_c_fn, dcf_c_fp):
-    """
+    """    
     Calculate:
     1. false negative (false reject) and false positive (false accept) rates
     2. minimum of the detection cost function and corresponding threshold score value
     3. equal error rate and corresponding threshold score value
+
+    Args:
+        sc ([type]): [description]
+        lab ([type]): [description]
+        dcf_p_target ([type]): [description]
+        dcf_c_fn ([type]): [description]
+        dcf_c_fp ([type]): [description]
     """
+  
 
     # Calculate false negative (false reject) and false positive (false accept) rates
     fprs, fnrs, thresholds = sklearn_metrics.det_curve(lab, sc, pos_label=1)
@@ -55,21 +70,18 @@ def _evaluate_sv(sc, lab, dcf_p_target, dcf_c_fn, dcf_c_fp):
 
 
 def _subgroup(df, filter_dict:dict):
-    """
-    Filter dataframe df by a demographic subgroup defined by filter_dict.
-    
-    ARGUMENTS
-    ---------
-    df [dataframe]: dataframe with speaker verification predictions that has columns:
+    """Filter dataframe df by a demographic subgroup defined by filter_dict.
+
+    Args:
+        df ([dataframe]): dataframe with speaker verification predictions that has columns:
                     df['sc']: scores
                     df['lab']: binary labels (0=False, 1=True)
-    filter_dict [dict]: filter specifying column names and unique values by which to filter
+        filter_dict (dict): filter specifying column names and unique values by which to filter
                     e.g. {'nationality':'India', 'sex':'female'} will select all rows where
                     df['nationality']=='India' and df['sex']=='female'
     
-    OUTPUT
-    ------
-    Subgroup dataframe with prediction scores ['sc'], labels ['lab'] and filter columns
+    Output:
+        Subgroup dataframe with prediction scores ['sc'], labels ['lab'] and filter columns
     """
 
     filters = ' & '.join([f"{k}=='{v}'" for k, v in filter_dict.items()])
