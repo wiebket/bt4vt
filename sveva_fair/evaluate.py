@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-Created on 18-05-2021
-@author: wiebket
-"""
+# Created on 18-05-2021
+# @author: wiebket
 
 import pandas as pd
 import numpy as np
@@ -48,7 +46,6 @@ def _evaluate_sv(sc, lab, dcf_p_target, dcf_c_fn, dcf_c_fp):
         dcf_c_fp ([type]): [description]
     """
   
-
     # Calculate false negative (false reject) and false positive (false accept) rates
     fprs, fnrs, thresholds = sklearn_metrics.det_curve(lab, sc, pos_label=1)
 
@@ -96,19 +93,15 @@ def fpfnth_metrics(df, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
     This function returns false negative rates, false positive rates and the corresponding 
     threshold values for scores in dataset df.  
     
-    ARGUMENTS
-    ---------
-    df [dataframe]: dataframe with speaker verification predictions that has columns:
-                    df['sc']: scores
-                    df['lab']: binary labels (0=False, 1=True)
-    dcf_p_target [float]: detection cost function target (default = 0.05)
-    dcf_c_fn [float]: detection cost function false negative weight (default = 1)
-    dcf_c_fp [float]: detection cost function  false positive weight (default = 1)
+    Args:
+        df (pandas.DataFrame): dataframe with speaker verification predictions that has columns `df['sc']: scores` and `df['lab']: binary labels (0=False, 1=True)`
+        dcf_p_target (float): detection cost function target (default = 0.05)
+        dcf_c_fn (float): detection cost function false negative weight (default = 1)
+        dcf_c_fp (float): detection cost function  false positive weight (default = 1)
     
-    OUTPUT
-    ------
-    fpfnth [dataframe]: dataframe with the following columns: 'fnrs','fprs','thresholds'
-    metrics [dictionary]: minimum detection cost and equal error rate metrics
+    Output:
+        fpfnth (dataframe): dataframe with the following columns: 'fnrs','fprs','thresholds'
+        metrics (dict): minimum detection cost and equal error rate metrics
     """
 
     if len(df)>0:
@@ -200,18 +193,15 @@ def sg_fpfnth_metrics(df, filter_keys:list, dcf_p_target=0.05, dcf_c_fn=1, dcf_c
 
 
 def fpfn_min_threshold(df, threshold, ppf_norm=False):
-    """
-    Calculate the false positive rate (FPR) and false negative rate (FNR) at the minimum threshold value.
-    
-    ARGUMENTS
-    ---------
-    df [dataframe]: dataframe, must contain false negative rates ['fnrs'], false positive rates ['fprs'] and threshold values ['thresholds']
-    threshold [float]: score at threshold 'min_cdet_threshold' or 'eer_threshold'
-    ppf_norm [bool]: normalise the FNR and FPR values to the percent point function (default = False)
-    
-    OUTPUT
-    ------
-    list: [FPR, FNR] at minimum threshold value
+    """Calculate the false positive rate (FPR) and false negative rate (FNR) at the minimum threshold value.
+
+    Args:
+        df (pandas.DataFrame): dataframe, must contain false negative rates ['fnrs'], false positive rates ['fprs'] and threshold values ['thresholds']
+        threshold (float): score at threshold 'min_cdet_threshold' or 'eer_threshold'
+        ppf_norm (bool, optional): normalise the FNR and FPR values to the percent point function. Defaults to False.
+
+    Returns:
+        list: [FPR, FNR] at minimum threshold value
     """
 
     # Find the index in df that is closest to the SUBGROUP minimum threshold value
@@ -231,7 +221,21 @@ def fpfn_min_threshold(df, threshold, ppf_norm=False):
 
 
 def cdet_ratio(fpfnth, metrics, metrics_baseline, filter_keys:list, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
-    
+    """[summary]
+
+    Args:
+        fpfnth ([type]): [description]
+        metrics ([type]): [description]
+        metrics_baseline ([type]): [description]
+        filter_keys (list): [description]
+        dcf_p_target (float, optional): [description]. Defaults to 0.05.
+        dcf_c_fn (int, optional): [description]. Defaults to 1.
+        dcf_c_fp (int, optional): [description]. Defaults to 1.
+
+    Returns:
+        [type]: [description]
+    """    
+
     fpfn_list = []
     for k in metrics.keys():
 
@@ -255,7 +259,18 @@ def cdet_ratio(fpfnth, metrics, metrics_baseline, filter_keys:list, dcf_p_target
 
 
 def fpfn_ratio(fpfnth, metrics, metrics_baseline, filter_keys:list, threshold_type):
-    
+    """[summary]
+
+    Args:
+        fpfnth ([type]): [description]
+        metrics ([type]): [description]
+        metrics_baseline ([type]): [description]
+        filter_keys (list): [description]
+        threshold_type ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """    
     fpfn_list = []
     for k in metrics.keys():
         
@@ -285,15 +300,14 @@ def fpfn_ratio(fpfnth, metrics, metrics_baseline, filter_keys:list, threshold_ty
 
 
 def compare_experiments(experiment_dict:dict, comparison:str):
-    """
-    
-    ARGUMENTS
-    ---------
-    experiment_dict [dict]: key:[fpfnth dataframe, metrics dict]
-    comparison [str]:
-    
-    OUTPUT
-    ------
+    """[summary]
+
+    Args:
+        experiment_dict (dict): key:[fpfnth dataframe, metrics dict]
+        comparison (str): [description]
+
+    Returns:
+        [type]: [description]
     """
     
     compare_df = []
@@ -311,19 +325,25 @@ def compare_experiments(experiment_dict:dict, comparison:str):
 
 
 def score_overlap(df, metrics):
-    """
-    Algorithm to calculate FP-FN overlap area for each subgroup
+    """Algorithm to calculate FP-FN overlap area for each subgroup
 
     For each subgroup:
-        Lookup the equal error rate threshold
-        Find min score where lab = 1
-        Find max score where lab = 0
-        If lab = 1:
-            Count scores where min_score <= score <= eer
-        If lab = 0:
-            Count scores where eer <= score <= max_score
-        Sum the overlap counts
-        Calculate probability ratio = overlap instances / total instances
+    Lookup the equal error rate threshold
+    Find min score where lab = 1
+    Find max score where lab = 0
+    If lab = 1:
+        Count scores where min_score <= score <= eer
+    If lab = 0:
+        Count scores where eer <= score <= max_score
+    Sum the overlap counts
+    Calculate probability ratio = overlap instances / total instances
+
+    Args:
+        df (pandas.DataFrame): [description]
+        metrics ([type]): [description]
+
+    Returns:
+        [type]: [description]
     """
 
     score_overlap = {}
