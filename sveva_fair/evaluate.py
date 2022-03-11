@@ -24,7 +24,7 @@ def _compute_min_cdet(fnrs, fprs, thresholds, dcf_p_target, dcf_c_fn, dcf_c_fp):
 
     cdet = np.array([fnr*dcf_c_fn*dcf_p_target for fnr in fnrs]) + np.array([fpr*dcf_c_fp*(1-dcf_p_target) for fpr in fprs])
     min_ix = np.nanargmin(cdet)
-    min_cdet = cdet[min_ix]
+    min_cdet = cdet[min_ix] # NB: divide by 0.05 to get results that correspond with VoxCeleb benchmark
     min_cdet_threshold = thresholds[min_ix]
 
     return(min_cdet, min_cdet_threshold)
