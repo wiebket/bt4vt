@@ -11,6 +11,8 @@ Welcome to SVEva Fair's documentation!
    :caption: Contents:
 
    evaluate
+   plot
+   voxceleb
 
 
 

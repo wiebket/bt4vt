@@ -1,5 +1,5 @@
 Evaluate
 ========
 
-.. automodule:: evaluate
+.. automodule:: sveva_fair.evaluate
    :members:
