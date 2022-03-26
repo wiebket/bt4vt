@@ -10,6 +10,7 @@ Welcome to SVEva Fair's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   intro
    evaluate
    plot
    voxceleb
