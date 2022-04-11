@@ -15,8 +15,8 @@ from .evaluate import fpfn_min_threshold
 
 
 def plot_det_curves(fpfnth, **kwargs):
+    """ [summary]
 
-    """
     :param fpfnth: must contain false negative rates ['fnrs'] and false positive rates ['fprs'].
     :type fpfnth: dataframe
     :param \**kwargs: If **kwargs are specified, then dataframe must contain columns with names used for values in hue, style and col (see below). Passed to seaborn.relplot()

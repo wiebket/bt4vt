@@ -13,14 +13,14 @@ import scipy as sp
 
 def voxceleb_scores_with_demographics(score_file, meta_file, **kwargs):
     """
-    ARGUMENTS
-    ---------
-    score_file [str]: path to file with scores
-    meta_file [str]: path to file with demographic metadata
-    **kwargs: optional, passed to pandas.read_csv() 
+    :param score_file: path to file with scores
+    :type score_file: str
+    :param meta_file: path to file with demographic metadata
+    :type meta_file: str
+    :param \**kwargs: optional, passed to pandas.read_csv()
     
-    OUTPUT
-    ------
+    :returns: [description]
+
     """
 
     # Get the scores for each pair of segments
@@ -81,17 +81,18 @@ def voxceleb_scores_with_demographics(score_file, meta_file, **kwargs):
 
 def summarise_df(demo_df):
     """
-    This function creates a multi-index ['ref_nationality','ref_gender'] dataframe with the following columns:
+    This function creates a multi-index ['ref_nationality','ref_gender'] dataframe with the following columns
+
     - count of unique speakers (unique_speakers)
+
     - mean utterances per speaker (utterances_speaker)
+
     - percentage of verification pairs in the same subgroup (same_subgroup)
-    
-    ARGUMENTS
-    ---------
-    demo_df [dataframe]: pandas dataframe object in the format of output of voxceleb_scores_with_demographics
-    
-    OUTPUT
-    ------
+
+    :param demo_df: pandas dataframe object in the format of output of voxceleb_scores_with_demographics
+    :type demo_df: dataframe
+
+    :returns: [description]
     """
     
     df = demo_df.groupby(['subgroup','ref_nationality','ref_gender']).agg({'ref_vggface1':'nunique','lab':'count','same_sg':'sum'})

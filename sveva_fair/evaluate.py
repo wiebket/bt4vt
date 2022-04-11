@@ -13,13 +13,21 @@ import sklearn.metrics as sklearn_metrics
 def _compute_min_cdet(fnrs, fprs, thresholds, dcf_p_target, dcf_c_fn, dcf_c_fp):
     """Compute the minimum of the detection cost function as defined in the NIST Speaker Recognition Evaluation Plan 2019.
 
-    Args:
-        fnrs ([type]): [description]
-        fprs ([type]): [description]
-        thresholds ([type]): [description]
-        dcf_p_target ([type]): [description]
-        dcf_c_fn ([type]): [description]
-        dcf_c_fp ([type]): [description]
+    :param fnrs: [description]
+    :type fnrs: [type]
+    :param fprs: [description]
+    :type fprs: [type]
+    :param thresholds: [description]
+    :type thresholds: [type]
+    :param dcf_p_target: [description]
+    :type dcf_p_target: [type]
+    :param dcf_c_fn: [description]
+    :type dcf_c_fn: [type]
+    :param dcf_c_fp: [description]
+    :type dcf_c_fp: [type]
+
+    :returns: min_cdet, min_cdet_threshold
+
     """    
 
     cdet = np.array([fnr*dcf_c_fn*dcf_p_target for fnr in fnrs]) + np.array([fpr*dcf_c_fp*(1-dcf_p_target) for fpr in fprs])
@@ -32,18 +40,24 @@ def _compute_min_cdet(fnrs, fprs, thresholds, dcf_p_target, dcf_c_fn, dcf_c_fp):
 
 
 def _evaluate_sv(sc, lab, dcf_p_target, dcf_c_fn, dcf_c_fp):
-    """    
-    Calculate:
+    """ Calculate:
     1. false negative (false reject) and false positive (false accept) rates
     2. minimum of the detection cost function and corresponding threshold score value
     3. equal error rate and corresponding threshold score value
 
-    Args:
-        sc ([type]): [description]
-        lab ([type]): [description]
-        dcf_p_target ([type]): [description]
-        dcf_c_fn ([type]): [description]
-        dcf_c_fp ([type]): [description]
+    :param sc: [description]
+    :type sc: [type]
+    :param lab: [description]
+    :type lab: [type]
+    :param dcf_p_target: [description]
+    :type dcf_p_target: [type]
+    :param dcf_c_fn: [description]
+    :type dcf_c_fn: [type]
+    :param dcf_c_fp: [description]
+    :type dcf_c_fp: [type]
+
+    :returns: fnrs, fprs, thresholds, min_cdet, min_cdet_threshold, eer, eer_threshold
+
     """
   
     # Calculate false negative (false reject) and false positive (false accept) rates
@@ -69,16 +83,12 @@ def _evaluate_sv(sc, lab, dcf_p_target, dcf_c_fn, dcf_c_fp):
 def _subgroup(df, filter_dict:dict):
     """Filter dataframe df by a demographic subgroup defined by filter_dict.
 
-    Args:
-        df ([dataframe]): dataframe with speaker verification predictions that has columns:
-                    df['sc']: scores
-                    df['lab']: binary labels (0=False, 1=True)
-        filter_dict (dict): filter specifying column names and unique values by which to filter
-                    e.g. {'nationality':'India', 'sex':'female'} will select all rows where
-                    df['nationality']=='India' and df['sex']=='female'
+    :param df: dataframe with speaker verification predictions that has columns, df['sc'] scores, df['lab'] binary labels (0=False, 1=True)
+    :type df: dataframe
+    :param filter_dict: filter specifying column names and unique values by which to filter e.g. {'nationality':'India', 'sex':'female'} will select all rows where df['nationality']=='India' and df['sex']=='female'
     
-    Output:
-        Subgroup dataframe with prediction scores ['sc'], labels ['lab'] and filter columns
+    :returns: Subgroup dataframe with prediction scores ['sc'], labels ['lab'] and filter columns
+
     """
 
     filters = ' & '.join([f"{k}=='{v}'" for k, v in filter_dict.items()])
@@ -93,15 +103,18 @@ def fpfnth_metrics(df, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
     This function returns false negative rates, false positive rates and the corresponding 
     threshold values for scores in dataset df.  
     
-    Args:
-        df (pandas.DataFrame): dataframe with speaker verification predictions that has columns `df['sc']: scores` and `df['lab']: binary labels (0=False, 1=True)`
-        dcf_p_target (float): detection cost function target (default = 0.05)
-        dcf_c_fn (float): detection cost function false negative weight (default = 1)
-        dcf_c_fp (float): detection cost function  false positive weight (default = 1)
-    
-    Output:
-        fpfnth (dataframe): dataframe with the following columns: 'fnrs','fprs','thresholds'
-        metrics (dict): minimum detection cost and equal error rate metrics
+    :param df: dataframe with speaker verification predictions that has columns `df['sc']: scores` and `df['lab']: binary labels (0=False, 1=True)`
+    :type df: pandas.DataFrame
+    :param dcf_p_target: detection cost function target (default = 0.05)
+    :type dcf_p_target: float
+    :param dcf_c_fn: detection cost function false negative weight (default = 1)
+    :type dcf_c_fn: float
+    :param dcf_c_fp: detection cost function  false positive weight (default = 1)
+    :type dcf_c_fp: float
+
+    :returns: fpfnth, metrics -- dataframe with the following columns: 'fnrs','fprs','thresholds' and minimum detection cost and equal error rate metrics
+    :rtype: dataframe, dict
+
     """
 
     if len(df)>0:
@@ -121,26 +134,24 @@ def fpfnth_metrics(df, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
     
 def sg_fpfnth_metrics(df, filter_keys:list, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
     """
-    This function returns false negative rates, false positive rates and threshold values 
+    This function returns false negative rates, false positive rates and threshold values
     for subgroups in dataframe df. Subgroups are defined by the column names specified in 
     the filter_keys argument.
-    
-    ARGUMENTS
-    ---------
-    df [dataframe]: dataframe with speaker verification predictions that has columns:
-                    df['sc']: scores
-                    df['lab']: binary labels (0=False, 1=True)
-    filter_keys [list]: list of column names in df that define subgroups, e.g. ['nationality','sex'] 
-                    Creates subgroups from all unique value pairs in the designated columns. Currently
-                    supports lists with 1, 2 or 3 items.
-    dcf_p_target [float]: detection cost function target (default = 0.05)
-    dcf_c_fn [float]: detection cost function false negative weight (default = 1)
-    dcf_c_fp [float]: detection cost function  false positive weight (default = 1)
-    
-    OUTPUT
-    ------
-    fpfnth [dataframe]: dataframe with the following columns: 'fnrs','fprs','thresholds','subgroup'
-    metrics [dictionary]: minimum detection cost and equal error rate metrics for each subgroup
+
+    :param df: dataframe with speaker verification predictions that has columns, df['sc'] scores, df['lab'] binary labels (0=False, 1=True)
+    :type df: dataframe
+    :param filter_keys: list of column names in df that define subgroups, e.g. ['nationality','sex'], Creates subgroups from all unique value pairs in the designated columns. Currently supports lists with 1, 2 or 3 items.
+    :type filter_keys: list
+    :param dcf_p_target: detection cost function target (default = 0.05)
+    :type dcf_p_target: float
+    :param dcf_c_fn: detection cost function false negative weight (default = 1)
+    :type dcf_c_fn: float
+    :param dcf_c_fp: detection cost function  false positive weight (default = 1)
+    :type dcf_c_fp: float
+
+    :returns: fpfnth, metrics dataframe with the following columns 'fnrs','fprs','thresholds','subgroup' and minimum detection cost and equal error rate metrics for each subgroup
+    :rtype: dataframe, dict
+
     """
 
     # Create a dictionary to construct subgroups from filter_keys {filter_key: [unique filter_key values], }
@@ -193,15 +204,18 @@ def sg_fpfnth_metrics(df, filter_keys:list, dcf_p_target=0.05, dcf_c_fn=1, dcf_c
 
 
 def fpfn_min_threshold(df, threshold, ppf_norm=False):
-    """Calculate the false positive rate (FPR) and false negative rate (FNR) at the minimum threshold value.
+    """ Calculate the false positive rate (FPR) and false negative rate (FNR) at the minimum threshold value.
 
-    Args:
-        df (pandas.DataFrame): dataframe, must contain false negative rates ['fnrs'], false positive rates ['fprs'] and threshold values ['thresholds']
-        threshold (float): score at threshold 'min_cdet_threshold' or 'eer_threshold'
-        ppf_norm (bool, optional): normalise the FNR and FPR values to the percent point function. Defaults to False.
+    :param df: dataframe, must contain false negative rates ['fnrs'], false positive rates ['fprs'] and threshold values ['thresholds']
+    :type df: pandas.DataFrame
+    :param threshold: score at threshold 'min_cdet_threshold' or 'eer_threshold'
+    :type threshold: float
+    :param ppf_norm: normalise the FNR and FPR values to the percent point function. Defaults to False.
+    :type ppf_norm: bool, optional
 
-    Returns:
-        list: [FPR, FNR] at minimum threshold value
+    :returns: [FPR, FNR] at minimum threshold value
+    :rtype: list
+
     """
 
     # Find the index in df that is closest to the SUBGROUP minimum threshold value
@@ -223,17 +237,24 @@ def fpfn_min_threshold(df, threshold, ppf_norm=False):
 def cdet_ratio(fpfnth, metrics, metrics_baseline, filter_keys:list, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
     """[summary]
 
-    Args:
-        fpfnth ([type]): [description]
-        metrics ([type]): [description]
-        metrics_baseline ([type]): [description]
-        filter_keys (list): [description]
-        dcf_p_target (float, optional): [description]. Defaults to 0.05.
-        dcf_c_fn (int, optional): [description]. Defaults to 1.
-        dcf_c_fp (int, optional): [description]. Defaults to 1.
+    :param fpfnth: [description]
+    :type fpfnth: [type]
+    :param metrics: [description]
+    :type metrics: [type]
+    :param metrics_baseline: [description]
+    :type metrics_baseline: [type]
+    :param filter_keys: [description]
+    :type filter_keys: list
+    :param dcf_p_target: [description]. Defaults to 0.05.
+    :type dcf_p_target: (float, optional)
+    :param dcf_c_fn: [description]. Defaults to 1.
+    :type dcf_c_fn: (int, optional)
+    :param dcf_c_fp: [description]. Defaults to 1.
+    :type dcf_c_fp: (int, optional)
 
-    Returns:
-        [type]: [description]
+    :returns: [description]
+    :rtype: [type]
+
     """    
 
     fpfn_list = []
@@ -261,16 +282,22 @@ def cdet_ratio(fpfnth, metrics, metrics_baseline, filter_keys:list, dcf_p_target
 def fpfn_ratio(fpfnth, metrics, metrics_baseline, filter_keys:list, threshold_type):
     """[summary]
 
-    Args:
-        fpfnth ([type]): [description]
-        metrics ([type]): [description]
-        metrics_baseline ([type]): [description]
-        filter_keys (list): [description]
-        threshold_type ([type]): [description]
+    :param fpfnth: [description]
+    :type fpfnth: [type]
+    :param metrics: [description]
+    :type metrics: [type]
+    :param metrics_baseline: [description]
+    :type metrics_baseline: [type]
+    :param filter_keys: [description]
+    :type filter_keys: list
+    :param threshold_type: [description]
+    :type threshold_type: [type]
 
-    Returns:
-        [type]: [description]
-    """    
+    :returns: [description]
+    :rtype: [type]
+
+    """
+
     fpfn_list = []
     for k in metrics.keys():
         
@@ -302,12 +329,14 @@ def fpfn_ratio(fpfnth, metrics, metrics_baseline, filter_keys:list, threshold_ty
 def compare_experiments(experiment_dict:dict, comparison:str):
     """[summary]
 
-    Args:
-        experiment_dict (dict): key:[fpfnth dataframe, metrics dict]
-        comparison (str): [description]
+    :param experiment_dict: key [fpfnth dataframe, metrics dict]
+    :type experiment_dict: dict
+    :param comparison: [description]
+    :type comparison: str
 
-    Returns:
-        [type]: [description]
+    :returns: [description]
+    :rtype: [type]
+
     """
     
     compare_df = []
@@ -327,23 +356,34 @@ def compare_experiments(experiment_dict:dict, comparison:str):
 def score_overlap(df, metrics):
     """Algorithm to calculate FP-FN overlap area for each subgroup
 
-    For each subgroup:
+    For each subgroup
+
     Lookup the equal error rate threshold
+
     Find min score where lab = 1
+
     Find max score where lab = 0
-    If lab = 1:
+
+    If lab = 1
+
         Count scores where min_score <= score <= eer
-    If lab = 0:
+
+    If lab = 0
+
         Count scores where eer <= score <= max_score
+
     Sum the overlap counts
+
     Calculate probability ratio = overlap instances / total instances
 
-    Args:
-        df (pandas.DataFrame): [description]
-        metrics ([type]): [description]
+    :param df: [description]
+    :type df: pandas.DataFrame
+    :param metrics: [description]
+    :type metrics: [type]
 
-    Returns:
-        [type]: [description]
+    :returns: [description]
+    :rtype: [type]
+
     """
 
     score_overlap = {}
