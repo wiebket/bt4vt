@@ -186,7 +186,7 @@ def sg_fpfnth_metrics(df, filter_keys:list, dcf_p_target=0.05, dcf_c_fn=1, dcf_c
         except:
             pass
 
-    fpfnth = pd.concat(fpfnth_list)
+    fpfnth = pd.concat(fpfnth_list, ignore_index=True)
 
     return(fpfnth, metrics)
 
