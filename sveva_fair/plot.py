@@ -14,7 +14,6 @@ import scipy as sp
 from .evaluate import fpfn_min_threshold
 
 
-
 def plot_det_curves(fpfnth, **kwargs):
     """
     
@@ -36,8 +35,8 @@ def plot_det_curves(fpfnth, **kwargs):
     except KeyError:
         n_col_wrap = None
 
-    g = sns.relplot(x=sp.stats.norm.ppf(fpfnth['fprs']), 
-                    y=sp.stats.norm.ppf(fpfnth['fnrs']), 
+    g = sns.relplot(x=sp.stats.norm.ppf(fpfnth['fprs']),
+                    y=sp.stats.norm.ppf(fpfnth['fnrs']),
                     hue=kwargs_hue,
                     style=kwargs_style,
                     col=kwargs_col,
@@ -47,7 +46,8 @@ def plot_det_curves(fpfnth, **kwargs):
                     height=4, aspect=1.3, 
                     kind='line', 
                     facet_kws=dict(sharex=False,sharey=False),
-                    data=fpfnth)
+                    data=fpfnth,
+                    ci=None)
 
     ticks = [0.001, 0.01, 0.05, 0.20, 0.5, 0.80, 0.95, 0.99, 0.999]
     tick_locations = sp.stats.norm.ppf(ticks)
