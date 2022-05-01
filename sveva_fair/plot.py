@@ -15,13 +15,15 @@ from .evaluate import fpfn_min_threshold
 
 
 def plot_det_curves(fpfnth, **kwargs):
-    """
-    
-    ARGUMENTS
-    ---------
-    fpfnth [dataframe]: dataframe, must contain false negative rates ['fnrs'] and false positive rates ['fprs']. 
-                        If **kwargs are specified, then dataframe must contain columns with names used for values in hue, style and col (see below)
-    **kwargs: valid options: hue, style, col, palette and linewidth. Passed to seaborn.relplot()
+    """ [summary]
+
+    :param fpfnth: must contain false negative rates ['fnrs'] and false positive rates ['fprs'].
+    :type fpfnth: dataframe
+    :param \**kwargs: If **kwargs are specified, then dataframe must contain columns with names used for values in hue, style and col (see below). Passed to seaborn.relplot()
+    :type \**kwargs: hue, style, col, palette and linewidth
+
+    :returns: FacetGrid object with baseline added
+
     """
 
     kwargs_hue = kwargs.get('hue', None)
@@ -73,17 +75,17 @@ def plot_det_curves(fpfnth, **kwargs):
 def plot_det_baseline(g, fpfnth_baseline, metrics_baseline, threshold_type, **kwargs):
     """
     Add a baseline DET curve to every DET curve subplot of an existing seaborn FacetGrid.
-    
-    ARGUMENTS
-    ---------
-    g [FacetGrid]: created for example with plot_det_curves()
-    fpfnth_baseline [dataframe]: dataframe, must contain false negative rates ['fnrs'], false positive rates ['fprs'] and threshold values ['thresholds']
-    threshold_value [float]: score at threshold 'min_cdet_threshold' or 'eer_threshold'  
-    **kwargs: valid options: c (colour='black'), s (size=75), marker (='^'), label (='threshold'). Passed to g.axes.flat.scatter()
-    
-    OUTPUT
-    ------
-    Returns FacetGrid object with baseline added
+
+    :param g: created for example with plot_det_curves()
+    :type g: FacetGrid
+    :param fpfnth_baseline: dataframe, must contain false negative rates ['fnrs'], false positive rates ['fprs'] and threshold values ['thresholds']
+    :type fpfnth_baseline: dataframe
+    :param threshold_value: score at threshold 'min_cdet_threshold' or 'eer_threshold'
+    :type threshold_value: float
+    :param \**kwargs: Passed to g.axes.flat.scatter()
+    :type \**kwargs: c (colour='black'), s (size=75), marker (='^'), label (='threshold')
+
+    :returns: FacetGrid object with baseline added
     """
     
     norm_fpfn = fpfn_min_threshold(fpfnth_baseline, metrics_baseline[threshold_type], ppf_norm=True)
@@ -104,20 +106,23 @@ def plot_det_baseline(g, fpfnth_baseline, metrics_baseline, threshold_type, **kw
 def plot_thresholds(g, fpfnth, metrics, threshold_type, min_threshold=['subgroup','overall'], metrics_baseline=None, **kwargs): #TO DO: change to thresholds
     """
     Add subgroup and overall thresholds at minimium threshold_type to every DET curve subplot of an existing seaborn FacetGrid.
+
+    :param g: created for example with plot_det_curves()
+    :type g: FacetGrid
+    :param fpfnth: output of sveva.evaluate.fpfnth [all_fpfnth dataframe, all_metrics dictionary] OR a list with a dataframe
+    :type fpfnth: dataframe
+    :param metrics:
+    :type metrics: list
+    :param threshold_type:
+    :type threshold_type: list
+    :param metrics_baseline:
+    :type metrics_baseline: list
+    :param min_threshold: valid items are 'subgroup', 'overall'. Plot thresholds at subgroup and overall minimum threshold value respectively.
+    :type min_threshold: list
+    :param \**kwargs: Passed to g.axes.flat.scatter()
+    :type \**kwargs: s (size=100), marker (='x')
     
-    ARGUMENTS
-    ---------
-    g [FacetGrid]: created for example with plot_det_curves()
-    fpfnth [dataframe]: output of sveva.evaluate.fpfnth [all_fpfnth dataframe, all_metrics dictionary] OR a list with a dataframe   
-    metrics []:
-    threshold_type []:
-    metrics_baseline []:
-    min_threshold [list]: valid items are 'subgroup', 'overall'. Plot thresholds at subgroup and overall minimum threshold value respectively.
-    **kwargs: valid options: s (size=100), marker (='x'). Passed to g.axes.flat.scatter()
-    
-    OUTPUT
-    ------    
-    Returns FacetGrid object with thresholds added
+    :returns: FacetGrid object with thresholds added
     """
     
     kwargs_s = kwargs.get('s', 100)
