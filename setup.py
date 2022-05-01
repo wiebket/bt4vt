@@ -20,6 +20,6 @@ setuptools.setup(
         "Natural Language :: English",
     ],
     packages=setuptools.find_packages(where="bt4vt"),
-    py_modules = ['bt4vt.voxceleb','bt4vt.evaluate','bt4vt.plot'],
+    py_modules=['bt4vt.core', 'bt4vt.voxceleb','bt4vt.plot'],
     python_requires=">=3.6",
 )
