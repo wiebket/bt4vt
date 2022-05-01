@@ -24,13 +24,20 @@ The quantitative fairness evaluation that SVEva Fair facilitates is based on the
 ## Setup instructions
 You need python 3 to use this library.
 
-1. Clone this repository from github.
-2. Navigate to the root directory (`sveva_fair`) and run `python setup.py install`.
+1. Clone this repository from github and navigate to root directory (`sveva_fair`)
+    ```
+    $ git clone https://github.com/wiebket/sveva-fair.git
+    ```
+2. Install all the requirements and the project
+    ```
+    $ pip install -r requirements.txt
+    $ python setup.py install
+    ```
 3. Import the sveva_fair `evaluate` and `plot` modules into your project
-```
-import sveva_fair.evaluate as sveva_evaluate
-import sveva_fair.plot as sveva_plot
-```
+    ```
+    import sveva_fair.evaluate as sveva_evaluate
+    import sveva_fair.plot as sveva_plot
+    ```
 
 ## Usage
 Below is an example for using SVEva Fair. All code and data for reproducing the example are contained in the [example](example) directory. The example evaluates the fairness of models released with the <a href="https://github.com/clovaai/voxceleb_trainer" target="_blank">VoxCeleb Trainer</a> benchmark.
