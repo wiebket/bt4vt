@@ -5,6 +5,8 @@
 # @author: wiebket, AnnaLesch
 
 import pandas as pd
+from datetime import datetime
+from pathlib import Path
 from .dataio import load_config, load_data
 from .evaluate import evaluate_scores
 from .groups import split_scores_by_speaker_groups
@@ -35,7 +37,7 @@ class BiasTest:
 
 class SpeakerBiasTest(BiasTest):
 
-    def __init__(self,
+    def __init__(self, scores,
                  config_file):
 
         self.fprs = pd.DataFrame()
@@ -44,7 +46,7 @@ class SpeakerBiasTest(BiasTest):
         self.metrics = pd.DataFrame()
 
         self.config = load_config(config_file)
-        scores_input = load_data(self.config['scores_file'])
+        scores_input = load_data(scores)
         speaker_metadata_input = load_data(self.config['speaker_metadata_file'])
 
         self.check_input(scores_input, speaker_metadata_input)
@@ -56,8 +58,17 @@ class SpeakerBiasTest(BiasTest):
         self.speaker_metadata = speaker_metadata_input
         # TODO: select and reorder metadata_file: rename to "id" first,
 
-        self.biastest_results_file = ""
-        # TODO: create output file
+        config_file_name = Path(config_file).stem
+        if isinstance(scores, str):
+            scores_file_name = Path(scores).stem
+        elif isinstance(scores, pd.DataFrame):
+            date = datetime.now()
+            scores_file_name = date.strftime("%d_%m_%Y_%H_%M_%S")
+        else:
+            # TODO: error handling
+            scores_file_name = None
+        self.biastest_results_file = config_file_name + "_" + scores_file_name
+
 
     def check_input(self, scores_input, speaker_metadata_input):
         # TODO: config_file

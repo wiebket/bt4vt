@@ -8,9 +8,15 @@ import pandas as pd
 import yaml
 
 
-def load_data(file_name):
+def load_data(file):
 
-    data = pd.read_csv(file_name)
+    if isinstance(file, str):
+        data = pd.read_csv(file)
+    elif isinstance(file, pd.DataFrame):
+        data = pd.read_table(file)
+    else:
+        data = None
+        #TODO: error handling
 
     return data
 
