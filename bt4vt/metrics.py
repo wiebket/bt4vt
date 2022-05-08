@@ -25,7 +25,7 @@ def compute_eer(fprs, fnrs, thresholds):
     return (eer, eer_threshold)
 
 
-def compute_min_cdet(fprs, fnrs, thresholds, dcf_p_target, dcf_c_fn, dcf_c_fp):
+def compute_min_cdet(fprs, fnrs, thresholds, dcf_p_target, dcf_c_fp, dcf_c_fn):
     """Compute the minimum of the detection cost function as defined in the NIST Speaker Recognition Evaluation Plan 2019.
 
     :param fnrs: [description]
