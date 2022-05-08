@@ -5,6 +5,7 @@
 # @author: wiebket, AnnaLesch
 
 import pandas as pd
+import numpy as np
 from datetime import datetime
 from pathlib import Path
 from .dataio import load_config, load_data
@@ -47,7 +48,7 @@ class SpeakerBiasTest(BiasTest):
 
         self.config = load_config(config_file)
         scores_input = load_data(scores)
-        speaker_metadata_input = load_data(self.config['speaker_metadata_file'])
+        speaker_metadata_input = load_data(self.config['speaker_metadata_file'], delim_whitespace=True)
 
         self.check_input(scores_input, speaker_metadata_input)
 
@@ -69,15 +70,48 @@ class SpeakerBiasTest(BiasTest):
             scores_file_name = None
         self.biastest_results_file = config_file_name + "_" + scores_file_name
 
-
     def check_input(self, scores_input, speaker_metadata_input):
-        # TODO: config_file
-        # TODO: check id_column exsists, select columns exist and speaker groups exist
-        # TODO: check that speaker groups are part of select columns
 
-        # TODO: score_input: check that all columns are in data frame as specified in config
+        # TODO error handling, at the moment only simple print messages
+        # check config file
+        try:
+            self.config["id_column"]
+        except KeyError:
+            print("id_column is missing in config file")
 
-        # TODO: speaker_metadata_input: check that ID and select columns are in dataframe as specified in config
+        try:
+            self.config["select_columns"]
+        except KeyError:
+            print("select_columns is missing in config file")
+
+        try:
+            self.config["speaker_groups"]
+        except KeyError:
+            print("speaker_groups is missing in config file")
+
+        speaker_group_list = [speaker_group for group_sublist in self.config["speaker_groups"] for speaker_group in group_sublist]
+        speaker_group_list = np.unique(speaker_group_list)
+        for speaker_group in speaker_group_list:
+            if speaker_group not in self.config["select_columns"]:
+                print(speaker_group + " not in select_columns")
+
+        # check scores_input
+        if self.config["reference_filepath_column"] not in scores_input.columns:
+            print("reference file name as specified in config file was not found in scores")
+        if self.config["test_filepath_column"] not in scores_input.columns:
+            print("test file name as specified in config file was not found in scores")
+        if self.config["label_column"] not in scores_input.columns:
+            print("label as specified in config file was not found in scores")
+        if self.config["scores_column"] not in scores_input.columns:
+            print("scores as specified in config file were not found in scores")
+
+        # check metadata_input
+        if self.config["id_column"] not in speaker_metadata_input.columns:
+            print("id_column as specified in config file was not found in metadata file")
+
+        for select_column in self.config["select_columns"]:
+            if select_column not in speaker_metadata_input.columns:
+                print(select_column + " as specified in config file was not found in metadata file")
 
         return
 
