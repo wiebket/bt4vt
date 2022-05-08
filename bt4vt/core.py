@@ -52,12 +52,20 @@ class SpeakerBiasTest(BiasTest):
 
         self.check_input(scores_input, speaker_metadata_input)
 
-        # columns selection, reordering and renaming
-        self.scores = scores_input
-        # TODO: select, reorder, rename score file: "label", "ref", "test", "score"
-
-        self.speaker_metadata = speaker_metadata_input
-        # TODO: select and reorder metadata_file: rename to "id" first,
+        # scores_input columns selection, reordering and renaming
+        scores_input = scores_input[[self.config["label_column"],
+                                     self.config["reference_filepath_column"],
+                                     self.config["test_filepath_column"],
+                                     self.config["scores_column"]]]
+        self.scores = scores_input.rename(columns={self.config["label_column"]: "label",
+                                                   self.config["reference_filepath_column"]: "ref",
+                                                   self.config["test_filepath_column"]: "test",
+                                                   self.config["scores_column"]: "score"})
+        # speaker_metadata_input column selection, reordering, renaming id
+        metadata_selection_list = self.config["select_columns"]
+        metadata_selection_list.insert(0, self.config["id_column"])
+        speaker_metadata_input = speaker_metadata_input[metadata_selection_list]
+        self.speaker_metadata = speaker_metadata_input.rename(columns={self.config["id_column"]: "id"})
 
         config_file_name = Path(config_file).stem
         if isinstance(scores, str):
