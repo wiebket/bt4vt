@@ -14,7 +14,7 @@ import scipy as sp
 # 2. Minimum of the Detection Cost Function (mincdet)
 #########################################
 
-def compute_eer(fnrs, fprs, thresholds):
+def compute_eer(fprs, fnrs, thresholds):
     """3. equal error rate and corresponding threshold score value"""
 
     # Calculate the equal error rate and its threshold
@@ -25,7 +25,7 @@ def compute_eer(fnrs, fprs, thresholds):
     return (eer, eer_threshold)
 
 
-def compute_min_cdet(fnrs, fprs, thresholds, dcf_p_target, dcf_c_fn, dcf_c_fp):
+def compute_min_cdet(fprs, fnrs, thresholds, dcf_p_target, dcf_c_fn, dcf_c_fp):
     """Compute the minimum of the detection cost function as defined in the NIST Speaker Recognition Evaluation Plan 2019.
 
     :param fnrs: [description]
