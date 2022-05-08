@@ -26,6 +26,9 @@ def load_config(file_name):
     with open(file_name, 'r') as file:
         config = yaml.safe_load(file)
 
+        # conversion to tuple as safe_load does not load tuples
+        config["dcf_costs"] = [tuple(v) for v in config["dcf_costs"]]
+
     return config
 
 
