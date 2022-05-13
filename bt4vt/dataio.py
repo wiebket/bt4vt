@@ -8,10 +8,10 @@ import pandas as pd
 import yaml
 
 
-def load_data(file, delim_whitespace=False):
+def load_data(file, sep=","):
 
     if isinstance(file, str):
-        data = pd.read_csv(file, delim_whitespace=delim_whitespace)
+        data = pd.read_csv(file, sep=sep)
     elif isinstance(file, pd.DataFrame):
         data = pd.read_table(file)
     else:

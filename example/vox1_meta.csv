@@ -1,4 +1,4 @@
-VoxCeleb1_ID    VGGFace1_ID	Gender	Nationality	Set
+VoxCeleb1 ID	VGGFace1 ID	Gender	Nationality	Set
 id10001	A.J._Buckley	m	Ireland	dev
 id10002	A.R._Rahman	m	India	dev
 id10003	Aamir_Khan	m	India	dev
@@ -168,7 +168,7 @@ id10166	Cillian_Murphy	m	Ireland	dev
 id10167	Cindy_Williams	f	USA	dev
 id10168	Claudia_Black	f	Australia	dev
 id10169	Claudia_Lee	f	USA	dev
-id10170	Cliff_Curtis	m	New_Zealand	dev
+id10170	Cliff_Curtis	m	New Zealand	dev
 id10171	Clive_Owen	m	UK	dev
 id10172	Colin_Donnell	m	USA	dev
 id10173	Constance_Zimmer	f	USA	dev
@@ -382,7 +382,7 @@ id10380	Hugh_Dancy	m	UK	dev
 id10381	Hugh_Jackman	m	Australia	dev
 id10382	Hugh_Laurie	m	UK	dev
 id10383	Hunter_Parrish	m	USA	dev
-id10384	Hye-kyo_Song	f	South_Korea	dev
+id10384	Hye-kyo_Song	f	South Korea	dev
 id10385	Iain_Glen	m	UK	dev
 id10386	Ian_Somerhalder	m	USA	dev
 id10387	Idina_Menzel	f	USA	dev
@@ -406,7 +406,7 @@ id10404	Jack_Reynor	m	USA	dev
 id10405	Jack_Whitehall	m	UK	dev
 id10406	Jacob_Latimore	m	USA	dev
 id10407	Jacqueline_Emerson	f	USA	dev
-id10408	Jacqueline_Fernandez	f	Sri_Lanka	dev
+id10408	Jacqueline_Fernandez	f	Sri Lanka	dev
 id10409	Jacqueline_MacInnes_Wood	f	Canada	dev
 id10410	Jai_Courtney	m	Australia	dev
 id10411	Jaime_Winstone	f	UK	dev
@@ -465,7 +465,7 @@ id10463	Jeff_Goldblum	m	USA	dev
 id10464	Jeffrey_Donovan	m	USA	dev
 id10465	Jeffrey_Tambor	m	USA	dev
 id10466	Jeffrey_Wright	m	USA	dev
-id10467	Jemaine_Clement	m	New_Zealand	dev
+id10467	Jemaine_Clement	m	New Zealand	dev
 id10468	Jen_Lilley	f	USA	dev
 id10469	Jenifer_Lewis	f	USA	dev
 id10470	Jenna_Coleman	f	UK	dev
@@ -701,7 +701,7 @@ id10699	Lisa_Whelchel	f	USA	dev
 id10700	Lizzy_Caplan	f	USA	dev
 id10701	Loan_Chabanol	f	Norway	dev
 id10702	Lolo_Jones	f	USA	dev
-id10703	Lorde	f	New_Zealand	dev
+id10703	Lorde	f	New Zealand	dev
 id10704	Lorenza_Izzo	f	Chile	dev
 id10705	Loretta_Devine	f	USA	dev
 id10706	Loretta_Swit	f	USA	dev
@@ -758,7 +758,7 @@ id10756	Mark_Strong	m	UK	dev
 id10757	Mark_Webber	m	Australia	dev
 id10758	Marla_Gibbs	f	USA	dev
 id10759	Martin_Clunes	m	UK	dev
-id10760	Martin_Henderson	m	New_Zealand	dev
+id10760	Martin_Henderson	m	New Zealand	dev
 id10761	Martin_Kove	m	USA	dev
 id10762	Martin_Shaw	m	UK	dev
 id10763	Martine_McCutcheon	f	UK	dev
@@ -874,7 +874,7 @@ id10872	Niall_Horan	m	Ireland	dev
 id10873	Nichelle_Nichols	f	USA	dev
 id10874	Nick_Kroll	m	USA	dev
 id10875	Nick_Thune	m	USA	dev
-id10876	Nicki_Minaj	f	Trinidad_and_Tobago	dev
+id10876	Nicki_Minaj	f	Trinidad and Tobago	dev
 id10877	Nicola_Peltz	f	USA	dev
 id10878	Nicole_Beharie	f	USA	dev
 id10879	Nicole_Richie	f	USA	dev
@@ -933,7 +933,7 @@ id10931	Peter_Berg	m	USA	dev
 id10932	Peter_Capaldi	m	UK	dev
 id10933	Peter_Coyote	m	USA	dev
 id10934	Peter_Facinelli	m	USA	dev
-id10935	Peter_Jackson	m	New_Zealand	dev
+id10935	Peter_Jackson	m	New Zealand	dev
 id10936	Peter_Jacobson	m	USA	dev
 id10937	Philip_Glenister	m	UK	dev
 id10938	Phyllis_Diller	f	USA	dev
@@ -967,7 +967,7 @@ id10965	Regina_Hall	f	USA	dev
 id10966	Reid_Scott	m	Canada	dev
 id10967	Rene_Auberjonois	m	Switzerland	dev
 id10968	Retta	f	USA	dev
-id10969	Rhys_Darby	m	New_Zealand	dev
+id10969	Rhys_Darby	m	New Zealand	dev
 id10970	Rhys_Ifans	m	UK	dev
 id10971	Richard_Ayoade	m	UK	dev
 id10972	Richard_Dean_Anderson	m	USA	dev
@@ -1003,7 +1003,7 @@ id11001	Ron_Perlman	m	USA	dev
 id11002	Ronda_Rousey	f	USA	dev
 id11003	Rooney_Mara	f	USA	dev
 id11004	Rory_Kennedy	f	USA	dev
-id11005	Rose_McIver	f	New_Zealand	dev
+id11005	Rose_McIver	f	New Zealand	dev
 id11006	Roshon_Fegan	m	USA	dev
 id11007	Rosie_Huntington-Whiteley	f	UK	dev
 id11008	Rowan_Atkinson	m	UK	dev
@@ -1023,7 +1023,7 @@ id11021	Ryan_Potter	m	USA	dev
 id11022	S._Epatha_Merkerson	f	USA	dev
 id11023	Sally_Hawkins	f	UK	dev
 id11024	Sam_Heughan	m	UK	dev
-id11025	Sam_Neill	m	New_Zealand	dev
+id11025	Sam_Neill	m	New Zealand	dev
 id11026	Sam_Palladio	m	UK	dev
 id11027	Sam_Raimi	m	USA	dev
 id11028	Sam_Riley	m	UK	dev
@@ -1073,7 +1073,7 @@ id11071	Shahid_Kapoor	m	India	dev
 id11072	Shailene_Woodley	f	USA	dev
 id11073	Shane_West	m	USA	dev
 id11074	Shannen_Doherty	f	USA	dev
-id11075	Sharlto_Copley	m	South_Africa	dev
+id11075	Sharlto_Copley	m	South Africa	dev
 id11076	Sharni_Vinson	f	Australia	dev
 id11077	Sharon_Gless	f	USA	dev
 id11078	Shay_Mitchell	f	Canada	dev

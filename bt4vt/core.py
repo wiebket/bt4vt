@@ -48,7 +48,7 @@ class SpeakerBiasTest(BiasTest):
 
         self.config = load_config(config_file)
         scores_input = load_data(scores)
-        speaker_metadata_input = load_data(self.config['speaker_metadata_file'], delim_whitespace=True)
+        speaker_metadata_input = load_data(self.config['speaker_metadata_file'], sep="\t")
 
         self.check_input(scores_input, speaker_metadata_input)
 
@@ -152,6 +152,8 @@ class SpeakerBiasTest(BiasTest):
 
         # do bias test
         metrics_ratios = compute_metrics_ratios(self.metrics)
+
+        # calculate a bias test score: function in metrics which takes output of compute_metrics_ratios
 
         return
 
