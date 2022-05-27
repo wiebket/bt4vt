@@ -142,11 +142,7 @@ class SpeakerBiasTest(BiasTest):
         for group in scores_by_speaker_groups:
             for category in scores_by_speaker_groups[group]:
                 label_score_list = scores_by_speaker_groups[group][category]
-                labels = [label_score_tuple[0] for label_score_tuple in label_score_list]
-                scores = [label_score_tuple[1] for label_score_tuple in label_score_list]
-                # exclude groups with #samples lower than 5
-                if len(labels) <= 5:
-                    continue
+                labels, scores = zip(*label_score_list)
 
                 fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['dcf_costs'], threshold_values=self.metrics['thresholds'])
 
