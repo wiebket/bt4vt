@@ -15,28 +15,28 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
     scores['ref_id'] = scores['ref'].apply(lambda x: x.split('/')[0])
 
     for group in speaker_groups:
-        filter_categories_per_group = {}
-        group_array = group
+        categories_per_group = {}
+        group_copy = group
 
-        while len(group_array) > 0:
-            group_name = group_array[0]
+        while len(group_copy) > 0:
+            group_name = group_copy[0]
             categories = list(speaker_metadata[group_name].unique())
-            filter_categories_per_group.update({group_name: categories})
-            group_array.pop(0)
+            categories_per_group.update({group_name: categories})
+            group_copy.pop(0)
 
-        scores_by_speaker_groups["_".join(filter_categories_per_group.keys())] = dict()
-        categories_combinations = list(itertools.product(*filter_categories_per_group.values()))
+        scores_by_speaker_groups["_".join(categories_per_group.keys())] = dict()
+        categories_combinations = list(itertools.product(*categories_per_group.values()))
 
         for combination in categories_combinations:
-            subgroup = speaker_metadata
+            subgroup_dataframe = speaker_metadata
             for index, subcategory in enumerate(combination):
-                subgroup = subgroup.loc[subgroup[list(filter_categories_per_group.keys())[index]] == subcategory]
+                subgroup_dataframe = subgroup_dataframe.loc[subgroup_dataframe[list(categories_per_group.keys())[index]] == subcategory]
 
-            if subgroup.empty:
+            if subgroup_dataframe.empty:
                 print("Warning: No values for subgroup" + str(combination))
                 continue
 
-            id_list = subgroup["id"]
+            id_list = subgroup_dataframe["id"]
             scores_filtered = scores[scores['ref_id'].isin(id_list)]
 
             # check if scores empty (example Sudan)
@@ -45,76 +45,6 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
                 continue
 
             label_score_list = scores_filtered[["label", "score"]].to_records(index=False)
-            scores_by_speaker_groups["_".join(filter_categories_per_group.keys())].update({"_".join(combination): label_score_list})
+            scores_by_speaker_groups["_".join(categories_per_group.keys())].update({"_".join(combination): label_score_list})
 
     return scores_by_speaker_groups
-
-
-def sg_fpfnth_metrics(df, filter_keys: list, dcf_p_target=0.05, dcf_c_fn=1, dcf_c_fp=1):
-    """
-    This function returns false negative rates, false positive rates and threshold values
-    for subgroups in dataframe df. Subgroups are defined by the column names specified in
-    the filter_keys argument.
-
-    :param df: dataframe with speaker verification predictions that has columns, df['sc'] scores, df['lab'] binary labels (0=False, 1=True)
-    :type df: dataframe
-    :param filter_keys: list of column names in df that define subgroups, e.g. ['nationality','sex'], Creates subgroups from all unique value pairs in the designated columns. Currently supports lists with 1, 2 or 3 items.
-    :type filter_keys: list
-    :param dcf_p_target: detection cost function target (default = 0.05)
-    :type dcf_p_target: float
-    :param dcf_c_fn: detection cost function false negative weight (default = 1)
-    :type dcf_c_fn: float
-    :param dcf_c_fp: detection cost function  false positive weight (default = 1)
-    :type dcf_c_fp: float
-
-    :returns: fpfnth, metrics dataframe with the following columns 'fnrs','fprs','thresholds','subgroup' and minimum detection cost and equal error rate metrics for each subgroup
-    :rtype: dataframe, dict
-
-    """
-
-    # Create a dictionary to construct subgroups from filter_keys {filter_key: [unique filter_key values], }
-    filter_dict = {}
-
-    for f_key in filter_keys:
-        f_vals = list(df[f_key].unique())
-        f_vals.sort()
-        filter_dict[f_key] = f_vals
-
-    # Create a list of dictionaries of potential subgroups from all combinations of values in filter_dict
-    # [{filter_keys[0]: filter_keys[0] first unique value, filter_keys[1]: filter_keys[1] first unique value},
-    #  {filter_keys[0]: filter_keys[0] second unique value, filter_keys[1]: filter_keys[1] first unique value}, ...]
-    filter_items = []
-
-    for val0 in filter_dict[filter_keys[0]]:
-        try:
-            for val1 in filter_dict[filter_keys[1]]:
-                try:
-                    for val2 in filter_dict[filter_keys[2]]:
-                        f_item = {filter_keys[0]: val0, filter_keys[1]: val1, filter_keys[2]: val2}
-                        filter_items.append(f_item)
-                except IndexError:
-                    f_item = {filter_keys[0]: val0, filter_keys[1]: val1}
-                    filter_items.append(f_item)
-        except IndexError:
-            f_item = {filter_keys[0]: val0}
-            filter_items.append(f_item)
-
-    fpfnth_list = []
-    metrics = {}
-
-    for fi in filter_items:
-        try:
-            sg = _subgroup(df, fi)
-            sg_fpfnth, sg_metrics = fpfnth_metrics(sg, dcf_p_target, dcf_c_fn, dcf_c_fp)
-            for key, val in fi.items():
-                sg_fpfnth[key] = val
-            sg_name = '_'.join([v.replace(" ", "").lower() for v in fi.values()])
-            sg_fpfnth['subgroup'] = sg_name
-            fpfnth_list.append(sg_fpfnth)
-            metrics[sg_name] = sg_metrics
-        except:
-            pass
-
-    fpfnth = pd.concat(fpfnth_list, ignore_index=True)
-
-    return (fpfnth, metrics)
