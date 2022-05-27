@@ -12,6 +12,8 @@ from .dataio import load_config, load_data
 from .evaluate import evaluate_scores
 from .groups import split_scores_by_speaker_groups
 from .metrics import compute_metrics_ratios
+from .plot import plot_det_curves
+
 
 class BiasTest:
 
@@ -137,18 +139,23 @@ class SpeakerBiasTest(BiasTest):
 
         # Calculate metrics for each group
         scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'])
-        # maybe create dictionary with groups and categories
         for group in scores_by_speaker_groups:
-            for category in group:
-                label = category[0]
-                score = category[1]
-                fprs, fnrs, thresholds, metric_scores = evaluate_scores(score, label, self.config['dcf_costs'], threshold_values=self.metrics['thresholds'])
-                self.fprs[category] = fprs
-                self.fnrs[category] = fnrs
-                self.thresholds[category] = thresholds
-                self.metrics[category] = metric_scores
+            for category in scores_by_speaker_groups[group]:
+                label_score_list = scores_by_speaker_groups[group][category]
+                labels = [label_score_tuple[0] for label_score_tuple in label_score_list]
+                scores = [label_score_tuple[1] for label_score_tuple in label_score_list]
+                # exclude groups with #samples lower than 5
+                if len(labels) <= 5:
+                    continue
+
+                fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['dcf_costs'], threshold_values=self.metrics['thresholds'])
+
+                self.fprs = pd.concat([self.fprs, pd.DataFrame({category: fprs})], axis=1)
+                self.fnrs = pd.concat([self.fnrs, pd.DataFrame({category: fnrs})], axis=1)
+                self.thresholds = pd.concat([self.thresholds, pd.DataFrame({category: thresholds})], axis=1)
 
                 # for metrics first row is eer, after that follow order of self.config.dcf_costs
+                self.metrics[category] = metric_scores
 
         # do bias test
         metrics_ratios = compute_metrics_ratios(self.metrics)
@@ -159,7 +166,7 @@ class SpeakerBiasTest(BiasTest):
 
     def plot(self):
 
-        # TODO: implement method
+        plot_det_curves(self.fprs, self.fnrs, subgroup="m")
 
         return
 
