@@ -80,8 +80,8 @@ def get_fpfn_at_threshold(fprs, fnrs, thresholds, threshold_value: float, ppf_no
         threshold_fpr = sp.stats.norm.ppf(fprs)[np.ndarray.argmin(threshold_diff)]
         threshold_fnr = sp.stats.norm.ppf(fnrs)[np.ndarray.argmin(threshold_diff)]
     else:
-        threshold_fpr = fprs.iloc[np.ndarray.argmin(threshold_diff)]
-        threshold_fnr = fnrs.iloc[np.ndarray.argmin(threshold_diff)]
+        threshold_fpr = fprs[np.ndarray.argmin(threshold_diff)]
+        threshold_fnr = fnrs[np.ndarray.argmin(threshold_diff)]
 
     return threshold_fpr, threshold_fnr
 
@@ -102,10 +102,8 @@ def compute_cdet_at_threshold(fprs, fnrs, thresholds, threshold_value: float, dc
 
 def compute_metrics_ratios(metric_scores):
 
-    # do metrics[2:N]/ metrics[1] because metrics[0] == thresholds
-    #metrics_ratios = metric_scores[category] / metric_scores['overall']
+    metrics_ratios = metric_scores.iloc[:, 1:].div(metric_scores['overall'], axis=0)
 
-    metrics_ratios = None
     return metrics_ratios
 
 
