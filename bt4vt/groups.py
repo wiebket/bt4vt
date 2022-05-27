@@ -4,6 +4,9 @@
 # Created on 01-05-2022
 # @author: wiebket, AnnaLesch
 
+import itertools
+
+
 def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
 
     scores_by_speaker_groups = dict()
@@ -15,7 +18,6 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
     #    filters = ' & '.join([f"{k}=='{v}'" for k, v in filter_dict.items()])
     #    sg = df.query(filters)
     #    sg[['sc','lab']+list(filter_dict.keys())]
-
     #1. Get categories in group
     # OLD method
     # for f_key in filter_keys:
@@ -27,6 +29,44 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
     #3. Get ids of all speakers in category in speaker_metadata
     #4. Filter & get score & label columns for ids from 3. that are in ref column in scores
     #5. Save as dictionary: scores_by_speaker_groups['group': {'category': (scores.label, scores.score)}]
+
+    # create id column for scores
+    scores['ref_id'] = scores['ref'].apply(lambda x: x.split('/')[0])
+
+    for group in speaker_groups:
+        if len(group) == 1:
+            string_group = group[0]
+            scores_by_speaker_groups[string_group] = dict()
+            categories = list(speaker_metadata[string_group].unique())
+            for category in categories:
+                subgroup = speaker_metadata.loc[speaker_metadata[string_group] == category]
+                id_list = subgroup["id"]
+                scores_filtered = scores[scores['ref_id'].isin(id_list)]
+                label_score_list = scores_filtered[["label", "score"]].to_records(index=False)
+                scores_by_speaker_groups[string_group].update({category : label_score_list})
+        else:
+            filter_categories_per_group = {}
+            group_array = group
+            while len(group_array) > 0:
+                group_name = group_array[0]
+                categories = list(speaker_metadata[group_name].unique())
+                filter_categories_per_group.update({group_name: categories})
+                group_array.pop(0)
+
+            scores_by_speaker_groups["_".join(filter_categories_per_group.keys())] = dict()
+            categories_combinations = list(itertools.product(*filter_categories_per_group.values()))
+            for combination in categories_combinations:
+                subgroup = speaker_metadata
+                for index, subcategory in enumerate(combination):
+                    subgroup = subgroup.loc[subgroup[list(filter_categories_per_group.keys())[index]] == subcategory]
+
+                if subgroup.empty:
+                    print("Warning: No values for subgroup" + str(combination))
+                    continue
+                id_list = subgroup["id"]
+                scores_filtered = scores[scores['ref_id'].isin(id_list)]
+                label_score_list = scores_filtered[["label", "score"]].to_records(index=False)
+                scores_by_speaker_groups["_".join(filter_categories_per_group.keys())].update({"_".join(combination): label_score_list})
 
     return scores_by_speaker_groups
 
