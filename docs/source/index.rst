@@ -19,7 +19,6 @@ Welcome to SVEva Fair's documentation!
    groups
    metrics
    plot
-   voxceleb
 
 
 
