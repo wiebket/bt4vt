@@ -13,7 +13,11 @@ Welcome to SVEva Fair's documentation!
    intro
    install
    example
+   core
+   dataio
    evaluate
+   groups
+   metrics
    plot
    voxceleb
 

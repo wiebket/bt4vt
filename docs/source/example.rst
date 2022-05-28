@@ -2,7 +2,7 @@
 Example
 =======
 
-Below is an example for using SVEva Fair. All code and data for reproducing the example are contained in the [example](example) directory.
+Below is an example for using bt4vt. All code and data for reproducing the example are contained in the [example](example) directory.
 The example evaluates the fairness of models released with the `VoxCeleb Trainer <https://github.com/clovaai/voxceleb_trainer>`_ benchmark.
 
 Evaluate speaker verification performance across subgroups
