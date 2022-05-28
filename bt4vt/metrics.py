@@ -131,17 +131,17 @@ def compute_cdet_at_threshold(fprs, fnrs, thresholds, threshold_value, dcf_p_tar
 # 2. Ratio of group fp, fn rates / overall fp, fn rates
 #########################################
 
-def compute_metrics_ratios(metric_scores):
+def compute_metrics_ratios(metrics):
     """Computation of metric ratios defined as the subgroup metric scores divided by the overall metric score.
 
-    :param metric_scores: DataFrame that contains metric scores for the overall evaluation and subgroup evaluations. The first row corresponds to the eer, all other rows correspond to the min_cdet scores with weights specified in the config file
-    :type metric_scores: DataFrame
+    :param metrics: DataFrame that contains metric scores for the overall evaluation and subgroup evaluations. The first row corresponds to the eer, all other rows correspond to the min_cdet scores with weights specified in the config file
+    :type metrics: DataFrame
 
     :returns: metric_ratios
     :rtype: DataFrame
 
     """
-    metrics_ratios = metric_scores.iloc[:, 1:].div(metric_scores['overall'], axis=0)
+    metrics_ratios = metrics.iloc[:, 1:].div(metrics['overall'], axis=0)
 
     return metrics_ratios
 
