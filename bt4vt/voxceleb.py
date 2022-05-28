@@ -76,3 +76,6 @@ def voxceleb_scores_with_demographics(score_file, meta_file, **kwargs):
     demo_df['subgroup'] = ['_'.join(z) for z in zip(demo_df['ref_nationality'].apply(lambda x: x.replace(" ", "").lower()), demo_df['ref_gender'])]
 
     return demo_df
+
+    # min_cdet_values
+    # NB: divide by 0.05 to get results that correspond with VoxCeleb benchmark
