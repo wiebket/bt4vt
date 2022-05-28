@@ -8,12 +8,21 @@ import pandas as pd
 import yaml
 
 
-def load_data(file, sep=","):
+def load_data(data_in):
+    """Read a csv, txt file or a DataFrame into a DataFrame. If given a file it uses the Python parsing engine to automatically detect the separator.
 
-    if isinstance(file, str):
-        data = pd.read_csv(file, sep=sep)
-    elif isinstance(file, pd.DataFrame):
-        data = pd.read_table(file)
+    :param data_in: Either path to csv or txt file or a Pandas DataFrame
+    :type data_in: str or DataFrame
+
+    :returns: data
+    :rtype: DataFrame
+
+    """
+
+    if isinstance(data_in, str):
+        data = pd.read_csv(data_in, sep=None, engine="python")
+    elif isinstance(data_in, pd.DataFrame):
+        data = pd.read_table(data_in)
     else:
         data = None
         #TODO: error handling
@@ -22,6 +31,15 @@ def load_data(file, sep=","):
 
 
 def load_config(file_name):
+    """Read a yaml config file into a dictionary.
+
+    :param file_name: path to the yaml config file
+    :type file_name: str
+
+    :returns: config
+    :rtype: dict
+
+    """
 
     with open(file_name, 'r') as file:
         config = yaml.safe_load(file)
