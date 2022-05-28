@@ -7,89 +7,120 @@
 import numpy as np
 import scipy as sp
 
-
 #########################################
 # In this section we compute performance evaluation metrics
 # 1. Equal Error Rate
 # 2. Minimum of the Detection Cost Function (mincdet)
 #########################################
 
-def compute_eer(fprs, fnrs, thresholds):
-    """3. equal error rate and corresponding threshold score value"""
 
-    # Calculate the equal error rate and its threshold
+def compute_eer(fprs, fnrs, thresholds):
+    """Computation of the Equal Error Rate and its threshold
+
+    :param fprs: Array of False Positive Rates
+    :type fprs: ndarray
+    :param fnrs: Array of False Negative Rates
+    :type fnrs: ndarray
+    :param thresholds: Array of Threshold values corresponding to fprs and fnrs
+    :type thresholds: ndarray
+
+    :returns: eer, eer_threshold
+    :rtype: float, float
+    """
+
+    # Compute the equal error rate and its threshold
     min_ix = np.nanargmin(np.absolute((fnrs - fprs)))
     eer = max(fprs[min_ix], fnrs[min_ix]) * 100
     eer_threshold = thresholds[min_ix]
 
-    return (eer, eer_threshold)
+    return eer, eer_threshold
 
 
 def compute_min_cdet(fprs, fnrs, thresholds, dcf_p_target, dcf_c_fp, dcf_c_fn):
-    """Compute the minimum of the detection cost function as defined in the NIST Speaker Recognition Evaluation Plan 2019.
+    """Computation of the minimum of the detection cost function and its threshold. Computation is performed as defined in the NIST Speaker Recognition Evaluation Plan 2019.
 
-    :param fnrs: [description]
-    :type fnrs: [type]
-    :param fprs: [description]
-    :type fprs: [type]
-    :param thresholds: [description]
-    :type thresholds: [type]
+    :param fprs: Array of False Positive Rates
+    :type fprs: ndarray
+    :param fnrs: Array of False Negative Rates
+    :type fnrs: ndarray
+    :param thresholds: Array of Threshold values corresponding to fprs and fnrs
+    :type thresholds: ndarray
     :param dcf_p_target: [description]
-    :type dcf_p_target: [type]
-    :param dcf_c_fn: [description]
-    :type dcf_c_fn: [type]
+    :type dcf_p_target: float
     :param dcf_c_fp: [description]
-    :type dcf_c_fp: [type]
+    :type dcf_c_fp: float
+    :param dcf_c_fn: [description]
+    :type dcf_c_fn: float
 
     :returns: min_cdet, min_cdet_threshold
-
+    :rtype: float, float
     """
 
     cdet = np.array([fnr * dcf_c_fn * dcf_p_target for fnr in fnrs]) + np.array(
         [fpr * dcf_c_fp * (1 - dcf_p_target) for fpr in fprs])
     min_ix = np.nanargmin(cdet)
-    min_cdet = cdet[min_ix]  # NB: divide by 0.05 to get results that correspond with VoxCeleb benchmark
+    min_cdet = cdet[min_ix]
     min_cdet_threshold = thresholds[min_ix]
 
-    return (min_cdet, min_cdet_threshold)
+    return min_cdet, min_cdet_threshold
 
 
-def get_fpfn_at_threshold(fprs, fnrs, thresholds, threshold_value: float, ppf_norm=False):
-    """ Calculate the false positive rate (FPR) and false negative rate (FNR) at the minimum threshold value.
+def get_fpfn_at_threshold(fprs, fnrs, thresholds, threshold_value, ppf_norm=False):
+    """Get the False Positive Rate and False Negative Rate at a given threshold value.
 
-    :param df: dataframe, must contain false negative rates ['fnrs'], false positive rates ['fprs'] and threshold values ['thresholds']
-    :type df: pandas.DataFrame
-    :param threshold: score at threshold 'min_cdet_threshold' or 'eer_threshold'
-    :type threshold: float
-    :param ppf_norm: normalise the FNR and FPR values to the percent point function. Defaults to False.
-    :type ppf_norm: bool, optional
+    :param fprs: Array of False Positive Rates
+    :type fprs: ndarray
+    :param fnrs: Array of False Negative Rates
+    :type fnrs: ndarray
+    :param thresholds: Array of Threshold values corresponding to fprs and fnrs
+    :type thresholds: ndarray
+    :param threshold_value: Threshold value to get fpr and fnr for i.e. min_cdet_threshold
+    :type threshold_value: float
+    :param ppf_norm: normalise the fpr and fnr values to the percent point function. Default is set to False.
+    :type ppf_norm: bool
 
-    :returns: [FPR, FNR] at minimum threshold value
-    :rtype: list
+    :returns: fpr_at_threshold, fnr_at_threshold
+    :rtype: float, float
 
     """
-    # Note: fprs, fnrs, thresholds are dataframes... structure has changed since rewriting. Need to check if this still works.
-    # Two options for changing:
-    # 1: only pass one column of dataframe, e.g. 'overall'
-    # 2: make sure method works for all columns, i.e. all subgroups in dataframe as once by ensuring matrix computation
-
     # Find the index in df that is closest to the SUBGROUP minimum threshold value
     threshold_diff = np.array([abs(i - threshold_value) for i in thresholds])
 
-    if ppf_norm == True:
-        threshold_fpr = sp.stats.norm.ppf(fprs)[np.ndarray.argmin(threshold_diff)]
-        threshold_fnr = sp.stats.norm.ppf(fnrs)[np.ndarray.argmin(threshold_diff)]
+    if ppf_norm:
+        fpr_at_threshold = sp.stats.norm.ppf(fprs)[np.ndarray.argmin(threshold_diff)]
+        fnr_at_threshold = sp.stats.norm.ppf(fnrs)[np.ndarray.argmin(threshold_diff)]
     else:
-        threshold_fpr = fprs[np.ndarray.argmin(threshold_diff)]
-        threshold_fnr = fnrs[np.ndarray.argmin(threshold_diff)]
+        fpr_at_threshold = fprs[np.ndarray.argmin(threshold_diff)]
+        fnr_at_threshold = fnrs[np.ndarray.argmin(threshold_diff)]
 
-    return threshold_fpr, threshold_fnr
+    return fpr_at_threshold, fnr_at_threshold
 
 
-def compute_cdet_at_threshold(fprs, fnrs, thresholds, threshold_value: float, dcf_p_target, dcf_c_fn, dcf_c_fp):
+def compute_cdet_at_threshold(fprs, fnrs, thresholds, threshold_value, dcf_p_target, dcf_c_fp, dcf_c_fn):
+    """Computation of detection cost function at a given threshold. Computation is performed as defined in the NIST Speaker Recognition Evaluation Plan 2019.
 
-    fp_at_threshold, fn_at_threshold = get_fpfn_at_threshold(fprs, fnrs, thresholds, threshold_value)
-    cdet_at_threshold = fp_at_threshold * dcf_c_fp * (1 - dcf_p_target) + fn_at_threshold * dcf_c_fn * dcf_p_target
+    :param fprs: Array of False Positive Rates
+    :type fprs: ndarray
+    :param fnrs: Array of False Negative Rates
+    :type fnrs: ndarray
+    :param thresholds: Array of Threshold values corresponding to fprs and fnrs
+    :type thresholds: ndarray
+    :param threshold_value: Threshold value to compute detection cost function for
+    :type threshold_value: float
+    :param dcf_p_target: [description]
+    :type dcf_p_target: float
+    :param dcf_c_fp: [description]
+    :type dcf_c_fp: float
+    :param dcf_c_fn: [description]
+    :type dcf_c_fn: float
+
+    :returns: cdet_at_threshold
+    :rtype: float
+
+    """
+
+    fpr_at_threshold, fnr_at_threshold = get_fpfn_at_threshold(fprs, fnrs, thresholds, threshold_value)
+    cdet_at_threshold = fpr_at_threshold * dcf_c_fp * (1 - dcf_p_target) + fnr_at_threshold * dcf_c_fn * dcf_p_target
 
     return cdet_at_threshold
 
@@ -101,7 +132,15 @@ def compute_cdet_at_threshold(fprs, fnrs, thresholds, threshold_value: float, dc
 #########################################
 
 def compute_metrics_ratios(metric_scores):
+    """Computation of metric ratios defined as the subgroup metric scores divided by the overall metric score.
 
+    :param metric_scores: DataFrame that contains metric scores for the overall evaluation and subgroup evaluations. The first row corresponds to the eer, all other rows correspond to the min_cdet scores with weights specified in the config file
+    :type metric_scores: DataFrame
+
+    :returns: metric_ratios
+    :rtype: DataFrame
+
+    """
     metrics_ratios = metric_scores.iloc[:, 1:].div(metric_scores['overall'], axis=0)
 
     return metrics_ratios
