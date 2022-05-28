@@ -39,10 +39,19 @@ class BiasTest:
 
 
 class SpeakerBiasTest(BiasTest):
+    """ The primary purpose of the SpeakerBiasTest class is the implementation of the audit() method, which performs the bias tests.
+
+        :param scores: Either path to csv or txt file or a Pandas DataFrame that includes information on the reference and test utterances as well as corresponding labels and scores
+        :type scores: str or DataFrame
+        :param config_file: path to yaml config file
+        :type config_file: str
+
+    """
 
     def __init__(self, scores,
                  config_file):
-
+        """Constructor method
+        """
         self.fprs = pd.DataFrame()
         self.fnrs = pd.DataFrame()
         self.thresholds = pd.DataFrame()
@@ -50,7 +59,7 @@ class SpeakerBiasTest(BiasTest):
 
         self.config = load_config(config_file)
         scores_input = load_data(scores)
-        speaker_metadata_input = load_data(self.config['speaker_metadata_file'], sep="\t")
+        speaker_metadata_input = load_data(self.config['speaker_metadata_file'])
 
         self.check_input(scores_input, speaker_metadata_input)
 
@@ -81,6 +90,14 @@ class SpeakerBiasTest(BiasTest):
         self.biastest_results_file = config_file_name + "_" + scores_file_name
 
     def check_input(self, scores_input, speaker_metadata_input):
+        """ Check that requirements for performing evaluation are fulfilled e.g. parameters of scores, speaker metadata and config are specified correctly
+
+            :param scores_input: DataFrame that contains reference and test utterances and corresponding labels and scores
+            :type scores_input: DataFrame
+            :param speaker_metadata_input: DataFrame that contains speaker metadata with speaker ids and speaker groups attributes as specified in config file
+            :type speaker_metadata_input: DataFrame
+
+        """
 
         # TODO error handling, at the moment only simple print messages
         # check config file
@@ -125,7 +142,9 @@ class SpeakerBiasTest(BiasTest):
 
         return
 
-    def audit(self): #note: check if weights is the right term to use, or if cost -- look at function
+    def audit(self):
+        """ Main method of the SpeakerBiasTest class which performs bias evaluation and tests
+        """
 
         # Calculate overall metrics
         fprs, fnrs, thresholds, metric_scores, metric_thresholds = evaluate_scores(self.scores['score'], self.scores['label'], self.config['dcf_costs'])
@@ -161,8 +180,10 @@ class SpeakerBiasTest(BiasTest):
         return
 
     def plot(self):
+        """ Plotting of bias test results
+        """
 
-        plot_det_curves(self.fprs, self.fnrs, subgroup="m")
+        plot_det_curves(self.fprs, self.fnrs, subgroup="f_India")
 
         return
 
