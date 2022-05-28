@@ -8,6 +8,19 @@ import itertools
 
 
 def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
+    """ Construction of a dictionary that holds a list of tuples (label, score) for the speaker groups as defined in the config file and their corresponding categories.
+
+    :param scores: DataFrame that contains reference and test utterances and corresponding labels and scores
+    :type scores: DataFrame
+    :param speaker_metadata: DataFrame that contains speaker metadata with speaker ids and speaker groups attributes as specified in config file
+    :type speaker_metadata: DataFrame
+    :param speaker_groups: List of speaker groups as specified in config file
+    :type speaker_groups: list
+
+    :returns: scores_by_speaker_groups
+    :rtype: dict
+
+    """
 
     scores_by_speaker_groups = dict()
 
@@ -16,7 +29,7 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
 
     for group in speaker_groups:
         categories_per_group = {}
-        group_copy = group
+        group_copy = group.copy()
 
         while len(group_copy) > 0:
             group_name = group_copy[0]
