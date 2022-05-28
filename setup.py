@@ -6,12 +6,12 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setuptools.setup(
     name="bt4vt",
     version="0.1",
-    author="Wiebke Toussaint",
+    author="Wiebke Toussaint, Anna Leschanowsky",
     author_email="w.toussaint@tudelft.nl",
-    description="Fair Speaker Verification EVAluation",
+    description="Bias Test for Voice Technologies",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/wiebket/sveva_fair",
+    url="https://github.com/wiebket/bt4vt",
     license="GPL-3.0-or-later",
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -20,6 +20,5 @@ setuptools.setup(
         "Natural Language :: English",
     ],
     packages=setuptools.find_packages(where="bt4vt"),
-    py_modules=['bt4vt.core', 'bt4vt.voxceleb','bt4vt.plot'],
     python_requires=">=3.6",
 )
