@@ -34,7 +34,7 @@ A template for the config.yaml file is provided in the example folder::
 
 
 2. Run the bias test audit
-^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
     import bt4vt

@@ -40,6 +40,7 @@ extensions = [
     'sphinx_rtd_theme',
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
+    'sphinx.ext.mathjax',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

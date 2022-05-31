@@ -37,7 +37,10 @@ def compute_eer(fprs, fnrs, thresholds):
 
 
 def compute_min_cdet(fprs, fnrs, thresholds, dcf_p_target, dcf_c_fp, dcf_c_fn):
-    """Computation of the minimum of the detection cost function and its threshold. Computation is performed as defined in the NIST Speaker Recognition Evaluation Plan 2019.
+    """Computation of the minimum of the detection cost function and its threshold.
+    Computation is performed as defined in the `NIST Speaker Recognition Evaluation Plan 2019 <https://www.nist.gov/itl/iad/mig/nist-2019-speaker-recognition-evaluation>`_
+
+    .. math:: C_{Det}(\\theta) = C_{FN} \\times P_{Target} \\times P_{FN}(\\theta) + C_{FP} \\times (1 - P_{Target}) \\times P_{FP}(\\theta)
 
     :param fprs: Array of False Positive Rates
     :type fprs: ndarray
@@ -97,7 +100,9 @@ def get_fpfn_at_threshold(fprs, fnrs, thresholds, threshold_value, ppf_norm=Fals
 
 
 def compute_cdet_at_threshold(fprs, fnrs, thresholds, threshold_value, dcf_p_target, dcf_c_fp, dcf_c_fn):
-    """Computation of detection cost function at a given threshold. Computation is performed as defined in the NIST Speaker Recognition Evaluation Plan 2019.
+    """Computation of detection cost function at a given threshold. Computation is performed as defined in the `NIST Speaker Recognition Evaluation Plan 2019 <https://www.nist.gov/itl/iad/mig/nist-2019-speaker-recognition-evaluation>`_
+
+    .. math:: C_{Det}(\\theta) = C_{FN} \\times P_{Target} \\times P_{FN}(\\theta) + C_{FP} \\times (1 - P_{Target}) \\times P_{FP}(\\theta)
 
     :param fprs: Array of False Positive Rates
     :type fprs: ndarray
