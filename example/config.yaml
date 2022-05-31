@@ -1,0 +1,15 @@
+speaker_metadata_file: "vox1_meta.csv"
+
+# for metadata
+id_column: "VoxCeleb1 ID"
+select_columns: ["Gender", "Nationality"]
+speaker_groups: [["Gender"], ["Nationality"], ["Gender", "Nationality"]]
+
+# for scores
+reference_filepath_column: "ref_file"
+test_filepath_column: "com_file"
+label_column: "lab"
+scores_column: "sc"
+
+# for audit
+dcf_costs: [[0.05, 1, 1]]
