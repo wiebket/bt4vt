@@ -11,10 +11,10 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import scipy as sp
-from .evaluate import fpfn_min_threshold
+from .metrics import get_fpfn_at_threshold
 
 
-def plot_det_curves(fpfnth, **kwargs):
+def plot_det_curves(fprs, fnrs, subgroup="overall"):
     """ [summary]
 
     :param fpfnth: must contain false negative rates ['fnrs'] and false positive rates ['fprs'].
@@ -25,30 +25,13 @@ def plot_det_curves(fpfnth, **kwargs):
     :returns: FacetGrid object with baseline added
 
     """
+    fpfn = pd.concat([fprs[subgroup], fnrs[subgroup]], axis=1)
 
-    kwargs_hue = kwargs.get('hue', None)
-    kwargs_style = kwargs.get('style', None)
-    kwargs_col = kwargs.get('col', None)
-    kwargs_palette= kwargs.get('palette', 'colorblind')
-    kwargs_lw = kwargs.get('linewidth', 2)
-    try:
-        n_kwargs_col = len(fpfnth[kwargs_col].unique())
-        n_col_wrap = 3 if n_kwargs_col >=3 else n_kwargs_col
-    except KeyError:
-        n_col_wrap = None
-
-    g = sns.relplot(x=sp.stats.norm.ppf(fpfnth['fprs']),
-                    y=sp.stats.norm.ppf(fpfnth['fnrs']),
-                    hue=kwargs_hue,
-                    style=kwargs_style,
-                    col=kwargs_col,
-                    col_wrap=n_col_wrap,
-                    palette=kwargs_palette,
-                    linewidth= kwargs_lw,
-                    height=4, aspect=1.3, 
+    g = sns.relplot(x=sp.stats.norm.ppf(fpfn.iloc[:, 0]),
+                    y=sp.stats.norm.ppf(fpfn.iloc[:, 1]),
                     kind='line', 
                     facet_kws=dict(sharex=False,sharey=False),
-                    data=fpfnth,
+                    data=fpfn,
                     ci=None)
 
     ticks = [0.001, 0.01, 0.05, 0.20, 0.5, 0.80, 0.95, 0.99, 0.999]
