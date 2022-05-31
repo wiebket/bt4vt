@@ -165,6 +165,7 @@ class SpeakerBiasTest(BiasTest):
 
                 fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['dcf_costs'], threshold_values=self.metrics['thresholds'])
 
+                # TODO: Wiebke to check on different dimensions for subgroups for fprs, fnrs, thresholds
                 self.fprs = pd.concat([self.fprs, pd.DataFrame({category: fprs})], axis=1)
                 self.fnrs = pd.concat([self.fnrs, pd.DataFrame({category: fnrs})], axis=1)
                 self.thresholds = pd.concat([self.thresholds, pd.DataFrame({category: thresholds})], axis=1)
