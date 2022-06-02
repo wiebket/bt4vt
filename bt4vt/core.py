@@ -6,6 +6,7 @@
 
 import pandas as pd
 import numpy as np
+import logging
 from datetime import datetime
 from pathlib import Path
 from .dataio import load_config, load_data
@@ -87,6 +88,12 @@ class SpeakerBiasTest(BiasTest):
         else:
             # TODO: error handling
             scores_file_name = None
+
+        if self.config["dataset_evaluation"]:
+            self.log_dataset_evaluation_file = config_file_name + "_" + scores_file_name + ".log"
+        else:
+            self.log_dataset_evaluation_file = None
+
         self.biastest_results_file = config_file_name + "_" + scores_file_name
 
     def check_input(self, scores_input, speaker_metadata_input):
@@ -157,7 +164,7 @@ class SpeakerBiasTest(BiasTest):
         # for metrics first row is eer, after that follow order of self.config.dcf_costs
 
         # Calculate metrics for each group
-        scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'])
+        scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'], self.log_dataset_evaluation_file)
         for group in scores_by_speaker_groups:
             for category in scores_by_speaker_groups[group]:
                 label_score_list = scores_by_speaker_groups[group][category]

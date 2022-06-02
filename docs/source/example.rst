@@ -29,6 +29,10 @@ A template for the config.yaml file is provided in the example folder::
     label_column: "lab"
     scores_column: "sc"
 
+    # for dataset evaluation
+
+    dataset_evaluation: True
+
     # for audit
     dcf_costs: [[0.05, 1, 1]]
 

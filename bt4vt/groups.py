@@ -5,9 +5,10 @@
 # @author: wiebket, AnnaLesch
 
 import itertools
+import logging
 
 
-def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
+def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups, log_file):
     """ Construction of a dictionary that holds a list of tuples (label, score) for the speaker groups as defined in the config file and their corresponding categories.
 
     :param scores: DataFrame that contains reference and test utterances and corresponding labels and scores
@@ -16,6 +17,8 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
     :type speaker_metadata: DataFrame
     :param speaker_groups: List of speaker groups as specified in config file
     :type speaker_groups: list
+    :param log_file: filename of dataset evaluation log file, if not None dataset evaluation information is written to the log file
+    :type log_file: str or None
 
     :returns: scores_by_speaker_groups
     :rtype: dict
@@ -46,7 +49,9 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
                 subgroup_dataframe = subgroup_dataframe.loc[subgroup_dataframe[list(categories_per_group.keys())[index]] == subcategory]
 
             if subgroup_dataframe.empty:
-                print("Warning: No values for subgroup" + str(combination))
+                if log_file is not None:
+                    logging.basicConfig(filename=log_file, encoding='utf-8', level=logging.INFO)
+                    logging.info("No values for subgroup" + str(combination))
                 continue
 
             id_list = subgroup_dataframe["id"]
@@ -54,7 +59,9 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
 
             # check if scores empty (example Sudan)
             if scores_filtered.empty:
-                print("Warning: No scores available for subgroup" + str(combination))
+                if log_file is not None:
+                    logging.basicConfig(filename=log_file, encoding='utf-8', level=logging.INFO)
+                    logging.info("No scores available for subgroup" + str(combination))
                 continue
 
             label_score_list = scores_filtered[["label", "score"]].to_records(index=False)
