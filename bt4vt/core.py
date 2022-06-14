@@ -6,14 +6,14 @@
 
 import pandas as pd
 import numpy as np
-import logging
+import os.path
 from datetime import datetime
 from pathlib import Path
 from .dataio import load_config, load_data
 from .evaluate import evaluate_scores
 from .groups import split_scores_by_speaker_groups
 from .metrics import compute_metrics_ratios
-from .plot import plot_det_curves
+#from .plot import plot_det_curves
 
 
 class BiasTest:
@@ -89,12 +89,18 @@ class SpeakerBiasTest(BiasTest):
             # TODO: error handling
             scores_file_name = None
 
-        if self.config["dataset_evaluation"]:
-            self.log_dataset_evaluation_file = config_file_name + "_" + scores_file_name + ".log"
-        else:
-            self.log_dataset_evaluation_file = None
+        # check if results directory exists
+        results_dir = self.config["results_dir"]
+        if not os.path.isdir(results_dir):
+            os.mkdir(results_dir)
 
-        self.biastest_results_file = config_file_name + "_" + scores_file_name
+        # dataset_evaluation will later be turned into a results file rather than a log file
+        if self.config["dataset_evaluation"]:
+            self.dataset_eval_log_file = "dataset_eval_" + config_file_name + "_" + scores_file_name + ".log"
+        else:
+            self.dataset_eval_log_file = None
+
+        self.biastest_results_file = "biastest_results_" + config_file_name + "_" + scores_file_name + ".csv"
 
     def check_input(self, scores_input, speaker_metadata_input):
         """ Check that requirements for performing evaluation are fulfilled e.g. parameters of scores, speaker metadata and config are specified correctly
@@ -164,7 +170,7 @@ class SpeakerBiasTest(BiasTest):
         # for metrics first row is eer, after that follow order of self.config.dcf_costs
 
         # Calculate metrics for each group
-        scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'], self.log_dataset_evaluation_file)
+        scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'], self.dataset_eval_log_file)
         for group in scores_by_speaker_groups:
             for category in scores_by_speaker_groups[group]:
                 label_score_list = scores_by_speaker_groups[group][category]
@@ -191,7 +197,7 @@ class SpeakerBiasTest(BiasTest):
         """ Plotting of bias test results
         """
 
-        plot_det_curves(self.fprs, self.fnrs, subgroup="f_India")
+        #plot_det_curves(self.fprs, self.fnrs, subgroup="f_India")
 
         return
 

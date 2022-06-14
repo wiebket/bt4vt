@@ -1,4 +1,5 @@
 speaker_metadata_file: "vox1_meta.csv"
+results_dir: "./results/"
 
 # for metadata
 id_column: "VoxCeleb1 ID"
