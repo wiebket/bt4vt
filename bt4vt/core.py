@@ -159,6 +159,8 @@ class SpeakerBiasTest(BiasTest):
         """ Main method of the SpeakerBiasTest class which performs bias evaluation and tests
         """
 
+        print("Running bias test on scores")
+
         # Calculate overall metrics
         fprs, fnrs, thresholds, metric_scores, metric_thresholds = evaluate_scores(self.scores['score'], self.scores['label'], self.config['dcf_costs'])
         self.fprs['overall'] = fprs
@@ -190,6 +192,8 @@ class SpeakerBiasTest(BiasTest):
         metrics_ratios = compute_metrics_ratios(self.metrics)
 
         # calculate a bias test score: function in metrics which takes output of compute_metrics_ratios
+
+        print("Bias test finished. Results saved to " + self.biastest_results_file)
 
         return
 
