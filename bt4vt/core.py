@@ -63,7 +63,7 @@ class SpeakerBiasTest(BiasTest):
         scores_input = load_data(scores)
         speaker_metadata_input = load_data(self.config['speaker_metadata_file'])
 
-        self.check_input(scores_input, speaker_metadata_input)
+        self._check_input(scores_input, speaker_metadata_input)
 
         # scores_input columns selection, reordering and renaming
         scores_input = scores_input[[self.config["label_column"],
@@ -97,13 +97,15 @@ class SpeakerBiasTest(BiasTest):
 
         # dataset_evaluation will later be turned into a results file rather than a log file
         if self.config["dataset_evaluation"]:
-            self.dataset_eval_log_file = "dataset_eval_" + config_file_name + "_" + scores_file_name + ".log"
+            self.__dataset_eval_log_file = "dataset_eval_" + config_file_name + "_" + scores_file_name + ".log"
         else:
-            self.dataset_eval_log_file = None
+            self.__dataset_eval_log_file = None
 
-        self.biastest_results_file = "biastest_results_" + config_file_name + "_" + scores_file_name + ".csv"
+        self.__biastest_results_file = "biastest_results_" + config_file_name + "_" + scores_file_name + ".csv"
 
-    def check_input(self, scores_input, speaker_metadata_input):
+
+
+    def _check_input(self, scores_input, speaker_metadata_input):
         """ Check that requirements for performing evaluation are fulfilled e.g. parameters of scores, speaker metadata and config are specified correctly
 
             :param scores_input: DataFrame that contains reference and test utterances and corresponding labels and scores
@@ -118,41 +120,41 @@ class SpeakerBiasTest(BiasTest):
         try:
             self.config["id_column"]
         except KeyError:
-            print("id_column is missing in config file")
+            print("id_column is missing in check config file")
 
         try:
             self.config["select_columns"]
         except KeyError:
-            print("select_columns is missing in config file")
+            print("select_columns is missing in check config file")
 
         try:
             self.config["speaker_groups"]
         except KeyError:
-            print("speaker_groups is missing in config file")
+            print("speaker_groups is missing in check config file")
 
         speaker_group_list = [speaker_group for group_sublist in self.config["speaker_groups"] for speaker_group in group_sublist]
         speaker_group_list = np.unique(speaker_group_list)
         for speaker_group in speaker_group_list:
             if speaker_group not in self.config["select_columns"]:
-                print(speaker_group + " not in select_columns")
+                print(speaker_group + " not in 'select_columns'")
 
         # check scores_input
         if self.config["reference_filepath_column"] not in scores_input.columns:
-            print("reference file name as specified in config file was not found in scores")
+            print("'reference_filepath_column' not found in scores (check config file)")
         if self.config["test_filepath_column"] not in scores_input.columns:
-            print("test file name as specified in config file was not found in scores")
+            print("'test_filepath_column' not found in scores (check config file)")
         if self.config["label_column"] not in scores_input.columns:
-            print("label as specified in config file was not found in scores")
+            print("'label_column' not found in scores (check config file)")
         if self.config["scores_column"] not in scores_input.columns:
-            print("scores as specified in config file were not found in scores")
+            print("'scores_column' not found in scores (check config file)")
 
         # check metadata_input
         if self.config["id_column"] not in speaker_metadata_input.columns:
-            print("id_column as specified in config file was not found in metadata file")
+            print("'id_column' not found in speaker_metadata_file (check config file)")
 
         for select_column in self.config["select_columns"]:
             if select_column not in speaker_metadata_input.columns:
-                print(select_column + " as specified in config file was not found in metadata file")
+                print(select_column + " not found in speaker_metadata_file (check config file)")
 
         return
 

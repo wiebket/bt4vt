@@ -1,4 +1,4 @@
-speaker_metadata_file: "vox1_meta.csv"
+speaker_metadata_file: "bt4vt/example/vox1_meta.csv"
 results_dir: "./results/"
 
 # for metadata
