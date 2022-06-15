@@ -31,7 +31,7 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
     scores['ref_id'] = scores['ref'].apply(lambda x: x.split('/')[0])
 
     for group in speaker_groups:
-        categories_per_group = {}
+        categories_per_group = dict()
         group_copy = group.copy()
 
         while len(group_copy) > 0:
@@ -41,6 +41,8 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
             group_copy.pop(0)
 
         scores_by_speaker_groups["_".join(categories_per_group.keys())] = dict()
+        # for a list of categories for groups create category combination
+        # e.g. Gender: [m, f], Nationality: [India] becomes [(m, India), (f, India)]
         categories_combinations = list(itertools.product(*categories_per_group.values()))
 
         for combination in categories_combinations:
