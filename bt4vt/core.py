@@ -198,7 +198,7 @@ class SpeakerBiasTest(BiasTest):
 
         # calculate a bias test score: function in metrics which takes output of compute_metrics_ratios
 
-        print("Bias test finished. Results saved to " + self.biastest_results_file)
+        print("Bias test finished. Results saved to " + self.__biastest_results_file)
 
         return
 
@@ -213,6 +213,6 @@ class SpeakerBiasTest(BiasTest):
     def evaluate_dataset(self):
 
         # TODO: implement method
-        evaluate_scores_by_speaker_groups(self.scores_by_speaker_groupsm, self.dataset_eval_log_file)
+        evaluate_scores_by_speaker_groups(self.scores_by_speaker_groupsm, self.__dataset_eval_log_file)
 
         return
