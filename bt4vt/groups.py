@@ -5,10 +5,10 @@
 # @author: wiebket, AnnaLesch
 
 import itertools
-import logging
+import numpy as np
 
 
-def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups, log_file):
+def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
     """ Construction of a dictionary that holds a list of tuples (label, score) for the speaker groups as defined in the config file and their corresponding categories.
 
     :param scores: DataFrame that contains reference and test utterances and corresponding labels and scores
@@ -48,23 +48,19 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups, log
             for index, subcategory in enumerate(combination):
                 subgroup_dataframe = subgroup_dataframe.loc[subgroup_dataframe[list(categories_per_group.keys())[index]] == subcategory]
 
+            # subgroup combination not available in speaker_metadata
             if subgroup_dataframe.empty:
-                if log_file is not None:
-                    logging.basicConfig(filename=log_file, encoding='utf-8', level=logging.INFO)
-                    logging.info("No values for subgroup" + str(combination))
+                scores_by_speaker_groups["_".join(categories_per_group.keys())].update({"_".join(combination): [(np.nan, np.nan)]})
                 continue
 
             id_list = subgroup_dataframe["id"]
             scores_filtered = scores[scores['ref_id'].isin(id_list)]
 
-            # check if scores empty (example Sudan)
+            # speaker id in metadata but no scores provided
             if scores_filtered.empty:
-                if log_file is not None:
-                    logging.basicConfig(filename=log_file, encoding='utf-8', level=logging.INFO)
-                    logging.info("No scores available for subgroup" + str(combination))
+                scores_by_speaker_groups["_".join(categories_per_group.keys())].update({"_".join(combination): [(np.nan, np.nan)]})
                 continue
 
             label_score_list = scores_filtered[["label", "score"]].to_records(index=False)
             scores_by_speaker_groups["_".join(categories_per_group.keys())].update({"_".join(combination): label_score_list})
-
     return scores_by_speaker_groups

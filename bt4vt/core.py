@@ -13,6 +13,7 @@ from .dataio import load_config, load_data
 from .evaluate import evaluate_scores
 from .groups import split_scores_by_speaker_groups
 from .metrics import compute_metrics_ratios
+from .dataset_evaluate import evaluate_scores_by_speaker_groups
 #from .plot import plot_det_curves
 
 
@@ -172,11 +173,13 @@ class SpeakerBiasTest(BiasTest):
         # for metrics first row is eer, after that follow order of self.config.dcf_costs
 
         # Calculate metrics for each group
-        scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'], self.dataset_eval_log_file)
-        for group in scores_by_speaker_groups:
-            for category in scores_by_speaker_groups[group]:
-                label_score_list = scores_by_speaker_groups[group][category]
+        self.scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'])
+        for group in self.scores_by_speaker_groups:
+            for category in self.scores_by_speaker_groups[group]:
+                label_score_list = self.scores_by_speaker_groups[group][category]
                 labels, scores = zip(*label_score_list)
+                if any(np.isnan(labels)) or any(np.isnan(scores)):
+                    continue
 
                 fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['dcf_costs'], threshold_values=self.metrics['thresholds'])
 
@@ -208,5 +211,6 @@ class SpeakerBiasTest(BiasTest):
     def evaluate_dataset(self):
 
         # TODO: implement method
+        evaluate_scores_by_speaker_groups(self.scores_by_speaker_groupsm, self.dataset_eval_log_file)
 
         return
