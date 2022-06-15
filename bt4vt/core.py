@@ -159,7 +159,15 @@ class SpeakerBiasTest(BiasTest):
         return
 
     def audit(self):
-        """ Main method of the SpeakerBiasTest class which performs bias evaluation and tests
+        """ Main method of the SpeakerBiasTest class which performs bias evaluation and tests.
+        This function calls :py:func:`evaluate.evaluate_scores` from :py:mod:`evaluate.py` for the overall dataset.
+        Later subgroups are constructed using :py:func:`groups.split_scores_by_speaker_groups` from :py:mod:`groups.py`.
+        These subgroup scores are again evaluated using :py:func:`evaluate.evaluate_scores`.
+        Lastly metric ratios are computed calling :py:func:`metrics.compute_metrics_ratios` from :py:mod:`metrics.py`.
+
+        :returns: biastest_results_file to the results directory as specified in config.yaml, the name of the file contains the config filename and the scores filename. If a scores dataframe was provided instead of a scores filename the results file contains the date and time of the evaluation
+        :rtype: csv_file
+
         """
 
         print("Running bias test on scores")
