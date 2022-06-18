@@ -146,7 +146,9 @@ def compute_metrics_ratios(metrics):
     :rtype: DataFrame
 
     """
-    metrics_ratios = metrics.iloc[:, 1:].div(metrics['overall'], axis=0)
+    metrics_ratios = metrics.iloc[1:, 1:].div(metrics['overall'], axis=0)
+    # save speaker groups
+    metrics_ratios.loc[0] = metrics.loc[0]
 
     return metrics_ratios
 

@@ -50,4 +50,11 @@ def load_config(file_name):
     return config
 
 
+def write_data(data, file_name):
+
+    data.to_csv(file_name, index=False)
+
+    return
+
+
 

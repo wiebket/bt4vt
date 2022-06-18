@@ -9,7 +9,7 @@ import numpy as np
 import os.path
 from datetime import datetime
 from pathlib import Path
-from .dataio import load_config, load_data
+from .dataio import load_config, load_data, write_data
 from .evaluate import evaluate_scores
 from .groups import split_scores_by_speaker_groups
 from .metrics import compute_metrics_ratios
@@ -103,8 +103,6 @@ class SpeakerBiasTest(BiasTest):
 
         self.__biastest_results_file = "biastest_results_" + config_file_name + "_" + scores_file_name + ".csv"
 
-
-
     def _check_input(self, scores_input, speaker_metadata_input):
         """ Check that requirements for performing evaluation are fulfilled e.g. parameters of scores, speaker metadata and config are specified correctly
 
@@ -177,8 +175,9 @@ class SpeakerBiasTest(BiasTest):
         self.fprs['overall'] = fprs
         self.fnrs['overall'] = fnrs
         self.thresholds['overall'] = thresholds
-        self.metrics['thresholds'] = metric_thresholds
-        self.metrics['overall'] = metric_scores
+        # add string to prepare for SpeakerGroup row
+        self.metrics['thresholds'] = ["thresholds"] + metric_thresholds
+        self.metrics['overall'] = ["overall"] + metric_scores
 
         # for metrics first row is eer, after that follow order of self.config.dcf_costs
 
@@ -199,10 +198,17 @@ class SpeakerBiasTest(BiasTest):
                 self.thresholds = pd.concat([self.thresholds, pd.DataFrame({category: thresholds})], axis=1)
 
                 # for metrics first row is eer, after that follow order of self.config.dcf_costs
-                self.metrics[category] = metric_scores
+                self.metrics[category] = [group] + metric_scores
 
-        # do bias test
+        # do bias test and bring metrics ratios in long format
         metrics_ratios = compute_metrics_ratios(self.metrics)
+        metrics_ratios = metrics_ratios.transpose()
+        metrics_ratios.index.name = 'Subgroup_Name'
+        metrics_ratios.columns = ["Speaker_Group", "EER"] + ["DCF" + str(cost) for cost in self.config["dcf_costs"]]
+        metrics_ratios.reset_index(inplace=True)
+
+        # write metrics ratios to biastest results file
+        write_data(metrics_ratios, self.config["results_dir"] + self.__biastest_results_file)
 
         # calculate a bias test score: function in metrics which takes output of compute_metrics_ratios
 

@@ -64,9 +64,9 @@ def evaluate_scores(scores, labels, dcf_costs, threshold_values=None):
         return fprs, fnrs, thresholds, metric_scores, metric_thresholds
     # this is the group case
     else:
-        # TODO error handling check that threshold_values is length(dcf_costs) + 1
+        # TODO error handling check that threshold_values is length(dcf_costs) + 2 as first one refers to subgroup and second to eer
         for index, cost in enumerate(dcf_costs):
-            cdet_at_threshold = compute_cdet_at_threshold(fprs, fnrs, thresholds, threshold_values[index + 1], cost[0],
+            cdet_at_threshold = compute_cdet_at_threshold(fprs, fnrs, thresholds, threshold_values[index + 2], cost[0],
                                                           cost[1], cost[2])
             metric_scores.append(cdet_at_threshold)
 
