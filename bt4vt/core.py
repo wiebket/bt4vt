@@ -172,8 +172,8 @@ class SpeakerBiasTest(BiasTest):
 
         # Calculate overall metrics
         fprs, fnrs, thresholds, metric_scores, metric_thresholds = evaluate_scores(self.scores['score'], self.scores['label'], self.config['dcf_costs'])
-        self.fprs['overall'] = fprs
-        self.fnrs['overall'] = fnrs
+        self.fprs['overall'] = ["overall"] + list(fprs)
+        self.fnrs['overall'] = ["overall"] + list(fnrs)
         self.thresholds['overall'] = thresholds
         # add string to prepare for SpeakerGroup row
         self.metrics['thresholds'] = ["thresholds"] + metric_thresholds
@@ -193,8 +193,8 @@ class SpeakerBiasTest(BiasTest):
                 fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['dcf_costs'], threshold_values=self.metrics['thresholds'])
 
                 # TODO: Wiebke to check on different dimensions for subgroups for fprs, fnrs, thresholds
-                self.fprs = pd.concat([self.fprs, pd.DataFrame({category: fprs})], axis=1)
-                self.fnrs = pd.concat([self.fnrs, pd.DataFrame({category: fnrs})], axis=1)
+                self.fprs = pd.concat([self.fprs, pd.DataFrame({category: [group] + list(fprs)})], axis=1)
+                self.fnrs = pd.concat([self.fnrs, pd.DataFrame({category: [group] + list(fnrs)})], axis=1)
                 self.thresholds = pd.concat([self.thresholds, pd.DataFrame({category: thresholds})], axis=1)
 
                 # for metrics first row is eer, after that follow order of self.config.dcf_costs
