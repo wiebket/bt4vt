@@ -56,7 +56,7 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
                 continue
 
             id_list = subgroup_dataframe["id"]
-            scores_filtered = scores[scores['ref_id'].isin(id_list)]
+            scores_filtered = scores[scores['ref_id'].astype(int).isin(id_list)]
 
             # speaker id in metadata but no scores provided
             if scores_filtered.empty:

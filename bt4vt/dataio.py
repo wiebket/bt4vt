@@ -22,7 +22,7 @@ def load_data(data_in):
     if isinstance(data_in, str):
         data = pd.read_csv(data_in, sep=None, engine="python")
     elif isinstance(data_in, pd.DataFrame):
-        data = pd.read_table(data_in)
+        data = data_in
     else:
         data = None
         #TODO: error handling
