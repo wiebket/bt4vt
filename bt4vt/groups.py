@@ -9,7 +9,7 @@ import numpy as np
 
 
 def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
-    """ Construction of a dictionary that holds a list of tuples (label, score) for the speaker groups as defined in the config file and their corresponding categories.
+    """ Construction of a dictionary that holds a list of tuples (label, score) for the speaker groups as defined in the config file and their corresponding subgroups.
 
     :param scores: DataFrame that contains reference and test utterances and corresponding labels and scores
     :type scores: DataFrame
@@ -31,28 +31,28 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
     scores['ref_id'] = scores['ref'].apply(lambda x: x.split('/')[0])
 
     for group in speaker_groups:
-        categories_per_group = dict()
+        subgroup_per_group = dict()
         group_copy = group.copy()
 
         while len(group_copy) > 0:
             group_name = group_copy[0]
-            categories = list(speaker_metadata[group_name].unique())
-            categories_per_group.update({group_name: categories})
+            subgroups = list(speaker_metadata[group_name].unique())
+            subgroup_per_group.update({group_name: subgroups})
             group_copy.pop(0)
 
-        scores_by_speaker_groups["_".join(categories_per_group.keys())] = dict()
-        # for a list of categories for groups create category combination
+        scores_by_speaker_groups["_".join(subgroup_per_group.keys())] = dict()
+        # for a list of subgroups for groups create category combination
         # e.g. Gender: [m, f], Nationality: [India] becomes [(m, India), (f, India)]
-        categories_combinations = list(itertools.product(*categories_per_group.values()))
+        subgroups_combinations = list(itertools.product(*subgroup_per_group.values()))
 
-        for combination in categories_combinations:
+        for combination in subgroups_combinations:
             subgroup_dataframe = speaker_metadata
             for index, subcategory in enumerate(combination):
-                subgroup_dataframe = subgroup_dataframe.loc[subgroup_dataframe[list(categories_per_group.keys())[index]] == subcategory]
+                subgroup_dataframe = subgroup_dataframe.loc[subgroup_dataframe[list(subgroup_per_group.keys())[index]] == subcategory]
 
             # subgroup combination not available in speaker_metadata
             if subgroup_dataframe.empty:
-                scores_by_speaker_groups["_".join(categories_per_group.keys())].update({"_".join(combination): [(np.nan, np.nan)]})
+                scores_by_speaker_groups["_".join(subgroup_per_group.keys())].update({"_".join(combination): [(np.nan, np.nan)]})
                 continue
 
             id_list = subgroup_dataframe["id"]
@@ -60,9 +60,9 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
 
             # speaker id in metadata but no scores provided
             if scores_filtered.empty:
-                scores_by_speaker_groups["_".join(categories_per_group.keys())].update({"_".join(combination): [(np.nan, np.nan)]})
+                scores_by_speaker_groups["_".join(subgroup_per_group.keys())].update({"_".join(combination): [(np.nan, np.nan)]})
                 continue
 
             label_score_list = scores_filtered[["label", "score"]].to_records(index=False)
-            scores_by_speaker_groups["_".join(categories_per_group.keys())].update({"_".join(combination): label_score_list})
+            scores_by_speaker_groups["_".join(subgroup_per_group.keys())].update({"_".join(combination): label_score_list})
     return scores_by_speaker_groups

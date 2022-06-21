@@ -180,8 +180,8 @@ class SpeakerBiasTest(BiasTest):
         # Calculate metrics for each group
         self.scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'])
         for group in self.scores_by_speaker_groups:
-            for category in self.scores_by_speaker_groups[group]:
-                label_score_list = self.scores_by_speaker_groups[group][category]
+            for subgroup in self.scores_by_speaker_groups[group]:
+                label_score_list = self.scores_by_speaker_groups[group][subgroup]
                 labels, scores = zip(*label_score_list)
                 if any(np.isnan(labels)) or any(np.isnan(scores)):
                     continue
@@ -191,17 +191,17 @@ class SpeakerBiasTest(BiasTest):
                 # TODO: Wiebke to check on different dimensions for subgroups for fprs, fnrs, thresholds
                 # if group in keys add to existing DataFrame otherwise create new key
                 if group in self.error_rates_by_speaker_group.keys():
-                    self.error_rates_by_speaker_group[group] = pd.concat([self.error_rates_by_speaker_group[group], pd.DataFrame({'category': category, 'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})])
+                    self.error_rates_by_speaker_group[group] = pd.concat([self.error_rates_by_speaker_group[group], pd.DataFrame({'Subgroup': subgroup, 'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})])
                 else:
-                    self.error_rates_by_speaker_group.update({group: pd.DataFrame({'Category': category, 'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})})
+                    self.error_rates_by_speaker_group.update({group: pd.DataFrame({'Subgroup': subgroup, 'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})})
 
                 # for metrics first row is eer, after that follow order of self.config.dcf_costs
-                self.metrics[category] = [group] + metric_scores
+                self.metrics[subgroup] = [group] + metric_scores
 
         # do bias test and bring metrics ratios in long format
         metrics_ratios = compute_metrics_ratios(self.metrics)
         metrics_ratios = metrics_ratios.transpose()
-        metrics_ratios.index.name = 'Subgroup_Name'
+        metrics_ratios.index.name = 'Subgroup'
         metrics_ratios.columns = ["Speaker_Group", "EER"] + ["DCF" + str(cost) for cost in self.config["dcf_costs"]]
         metrics_ratios.reset_index(inplace=True)
 
