@@ -54,9 +54,7 @@ class SpeakerBiasTest(BiasTest):
                  config_file):
         """Constructor method
         """
-        self.fprs = pd.DataFrame()
-        self.fnrs = pd.DataFrame()
-        self.thresholds = pd.DataFrame()
+        self.error_rates_by_speaker_group = dict()
         self.metrics = pd.DataFrame()
 
         self.config = load_config(config_file)
@@ -172,9 +170,7 @@ class SpeakerBiasTest(BiasTest):
 
         # Calculate overall metrics
         fprs, fnrs, thresholds, metric_scores, metric_thresholds = evaluate_scores(self.scores['score'], self.scores['label'], self.config['dcf_costs'])
-        self.fprs['overall'] = ["overall"] + list(fprs)
-        self.fnrs['overall'] = ["overall"] + list(fnrs)
-        self.thresholds['overall'] = thresholds
+        self.error_rates_by_speaker_group.update({"overall": pd.DataFrame({'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})})
         # add string to prepare for SpeakerGroup row
         self.metrics['thresholds'] = ["thresholds"] + metric_thresholds
         self.metrics['overall'] = ["overall"] + metric_scores
@@ -193,9 +189,11 @@ class SpeakerBiasTest(BiasTest):
                 fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['dcf_costs'], threshold_values=self.metrics['thresholds'])
 
                 # TODO: Wiebke to check on different dimensions for subgroups for fprs, fnrs, thresholds
-                self.fprs = pd.concat([self.fprs, pd.DataFrame({category: [group] + list(fprs)})], axis=1)
-                self.fnrs = pd.concat([self.fnrs, pd.DataFrame({category: [group] + list(fnrs)})], axis=1)
-                self.thresholds = pd.concat([self.thresholds, pd.DataFrame({category: thresholds})], axis=1)
+                # if group in keys add to existing DataFrame otherwise create new key
+                if group in self.error_rates_by_speaker_group.keys():
+                    self.error_rates_by_speaker_group[group] = pd.concat([self.error_rates_by_speaker_group[group], pd.DataFrame({'category': category, 'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})])
+                else:
+                    self.error_rates_by_speaker_group.update({group: pd.DataFrame({'Category': category, 'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})})
 
                 # for metrics first row is eer, after that follow order of self.config.dcf_costs
                 self.metrics[category] = [group] + metric_scores
