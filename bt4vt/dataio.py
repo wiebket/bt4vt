@@ -6,6 +6,7 @@
 
 import pandas as pd
 import yaml
+import os
 
 
 def load_data(data_in):
@@ -41,7 +42,7 @@ def load_config(file_name):
 
     """
 
-    with open(file_name, 'r') as file:
+    with open(os.path.expanduser(file_name), 'r') as file:
         config = yaml.safe_load(file)
 
         # conversion to tuple as safe_load does not load tuples

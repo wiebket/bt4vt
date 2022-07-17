@@ -6,7 +6,7 @@
 
 import pandas as pd
 import numpy as np
-import os.path
+import os
 from datetime import datetime
 from pathlib import Path
 from .dataio import load_config, load_data, write_data
@@ -90,8 +90,8 @@ class SpeakerBiasTest(BiasTest):
 
         # check if results directory exists
         results_dir = self.config["results_dir"]
-        if not os.path.isdir(results_dir):
-            os.mkdir(results_dir)
+        if not os.path.isdir(os.path.expanduser(results_dir)):
+            os.mkdir(os.path.expanduser(results_dir))
 
         # dataset_evaluation will later be turned into a results file rather than a log file
         if self.config["dataset_evaluation"]:

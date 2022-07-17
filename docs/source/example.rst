@@ -16,7 +16,8 @@ __________________________________________________________
 
 A template for the config.yaml file is provided in the example folder::
 
-    speaker_metadata_file: "vox1_meta.csv"
+    speaker_metadata_file: "~/bias_tests_4_voice_tech/example/vox1_meta.csv"
+    results_dir: "~/bias_tests_4_voice_tech/results/"
 
     # for metadata
     id_column: "VoxCeleb1 ID"
@@ -43,8 +44,8 @@ A template for the config.yaml file is provided in the example folder::
 
     import bt4vt
 
-    score_file = "resnetse34v2_H/eval_scores.csv"
-    config_file = "config.yaml"
+    score_file = "~/bias_tests_4_voice_tech/example/resnetse34v2_H-eval_scores.csv"
+    config_file = "~/bias_tests_4_voice_tech/example/config.yaml"
     test1 = bt4vt.core.SpeakerBiasTest(score_file, config_file)
     test1.audit()
 
