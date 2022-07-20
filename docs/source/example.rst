@@ -34,11 +34,11 @@ A template for the config.yaml file is provided in the *bias_tests_4_voice_tech/
     dcf_costs: [[0.05, 1, 1]]
 
 
-2. Run the bias test audit
+2. Run the bias tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Import **bt4vt** and specify your score and config file path.
 
-Pass the score and config file to the :py:class:`bt4vt.core.SpeakerBiasTest` class and run the :py:func:`bt4vt.core.SpeakerBiasTest.audit` function::
+Pass the score and config file path to the :py:class:`bt4vt.core.SpeakerBiasTest` class and run the :py:func:`bt4vt.core.SpeakerBiasTest.audit` function::
 
     import bt4vt
 

@@ -8,7 +8,7 @@ Fair machine learning is necessary for these technologies to be free from bias a
 `bt4vt` is an actionable and model-agnostic framework for evaluating the fairness of voice technology components (currently limited to speaker verification). 
 This python framework provides evaluation measures and visualisations to interrogate model performance and can be integrated into your development pipeline to troubleshoot unreliable performance.
 
-Link to the full documentation: 
+Link to the full documentation: https://bt4vt.readthedocs.io/en/latest/
 
 The development of this framework is part of the [Fair EVA open source project](https://www.faireva.org/). 
 
@@ -36,10 +36,38 @@ Below is an example for using `bt4vt`. All code and data for reproducing the exa
 
 ### Run Bias Tests for Speaker Verification
 
-Import `bt4vt` and specify your score and config file. 
-More on the config file can be found here (TODO add link to documentation).
+#### 1. Create config file
 
-Pass the score and config file to the `SpeakerBiastTest` class and run the `audit()` (TODO Link to documentation) function.
+A template for the config.yaml file is provided in the *bias_tests_4_voice_tech/example/* folder in your home directory once you have installed the package.
+
+```
+    speaker_metadata_file: "~/bias_tests_4_voice_tech/example/vox1_meta.csv"
+    results_dir: "~/bias_tests_4_voice_tech/results/"
+
+    # for metadata
+    id_column: "VoxCeleb1 ID"
+    select_columns: ["Gender", "Nationality"]
+    speaker_groups: [["Gender"], ["Nationality"], ["Gender", "Nationality"]]
+
+    # for scores
+    reference_filepath_column: "ref_file"
+    test_filepath_column: "com_file"
+    label_column: "lab"
+    scores_column: "sc"
+
+    # for dataset evaluation
+
+    dataset_evaluation: True
+
+    # for audit
+    dcf_costs: [[0.05, 1, 1]]
+```
+
+#### 2. Run the bias tests 
+
+Import `bt4vt` and specify your score and config file. 
+
+Pass the score and config file path to the `SpeakerBiastTest` class and run the `audit()` function.
 
 ```
 import bt4vt
