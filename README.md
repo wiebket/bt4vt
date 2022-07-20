@@ -1,24 +1,16 @@
-# bt4vt - Bias Test for Voice Technologies: Building fair voice systems
+# bt4vt - Bias Tests for Voice Technologies: Building fair voice systems
 
 ## About this package
-bt4vt is an actionable and model-agnostic framework for evaluating the fairness of speaker verification components in voice assistants. The framework provides evaluation measures and visualisations to interrogate model performance across speaker subgroups and compare fairness between models. This repository contains a python library that implements SVEva Fair. You can integrate SVEva Fair into your embedded ML development pipeline to troubleshoot unreliable speaker verification performance, and select high impact approaches for mitigating fairness challenges.
 
-bt4vt equips you to interrogate your speaker verification models to answer two questions:
+Voice-based systems are widely adopted in users' devices, homes and vehicles as well as in the commerical field, i.e. in call centers or banks. Thus, it is important that they work reliably for all users. Speaker verification is one of the largely deployed voice technologies within these systems that relies on machine learning.
+Fair machine learning is necessary for these technologies to be free from bias and discrimnation against users with protected attributes, like race and ethnicity, sex, religion and belief, age, disability, or sexual orientation.
 
-1. Fairness: Does speaker verification performance vary across speaker subgroups for a particular model?
-2. Comparison: How does fairness compare across speaker verification models?
+`bt4vt` is an actionable and model-agnostic framework for evaluating the fairness of voice technology components (currently limited to speaker verification). 
+This python framework provides evaluation measures and visualisations to interrogate model performance and can be integrated into your development pipeline to troubleshoot unreliable performance.
 
-Full details on bt4vt and a case study that evaluates the fairness of benchmark models trained with the VoxCeleb Trainer benchmark are available here:
+Link to the full documentation: 
 
-*Toussaint, W. and Ding, A. 2021. “SVEva Fair: A Framework for Evaluating Fairness in Speaker Verification.”, https://arxiv.org/abs/2107.12049* 
-
-### Fair Speaker Evaluation
-
-#### Why does fairness matter?
-Fair machine learning requires machine learning systems and products to be free from bias and discrimnation against users with protected attributes, like race and ethnicity, sex, religion and belief, age, disability, or sexual orientation. Given the large-scale deployment of speaker verification in voice assistants, and the important function that voice-based systems have as a user interface in wearables, smart homes and autonomous vehicles, it is necessary that they work reliably for all users. Building discrimantory systems can also carry legal consequences and reputational damage for developers.
-
-#### Defining appropriate fairness metrics
-The quantitative fairness evaluation that bt4vt facilitates is based on the equalised odds fairness metric. Equalised odds requires protected and unprotected subgroups to have equal true and false positive rates, which is equivalent to equal false negative and false positive rates across subgroups. This definition naturally fits with the false negative and false positive rate trade-offs that speaker verification applications must make. In particular, the detection cost function which is the dominant evaluation metric in speaker verification, can be viewed as a weighted equalised odds ratio. bt4vt adopts the detection cost as a proxy for fairness.
+The development of this framework is part of the [Fair EVA open source project](https://www.faireva.org/). 
 
 ## Setup instructions
 You need python 3 to use this library.
@@ -27,7 +19,9 @@ You need python 3 to use this library.
     ```
     $ git clone https://github.com/wiebket/bt4vt.git
     ```
-2. Install all the requirements and the project
+2. Install all the requirements and the project.
+
+    The installation will create the `bias_tests_4_voice_tech` folder in your home directory. It provides an example how to use `bt4vt` and can be deleted if not required. 
     ```
     $ pip install -r requirements.txt
     $ python setup.py install
@@ -38,54 +32,44 @@ You need python 3 to use this library.
     ```
 
 ## Usage
-Below is an example for using bt4vt. All code and data for reproducing the example are contained in the [example](example) directory. The example evaluates the fairness of models released with the <a href="https://github.com/clovaai/voxceleb_trainer" target="_blank">VoxCeleb Trainer</a> benchmark.
+Below is an example for using `bt4vt`. All code and data for reproducing the example are contained in the `bias_tests_4_voice_tech` folder in your home directory. The example evaluates the fairness of models released with the <a href="https://github.com/clovaai/voxceleb_trainer" target="_blank">VoxCeleb Trainer</a> benchmark.
 
-### Evaluate speaker verification performance across subgroups
+### Run Bias Tests for Speaker Verification
 
-#### 1. Generate speaker verification results with metadata
+Import `bt4vt` and specify your score and config file. 
+More on the config file can be found here (TODO add link to documentation).
 
-For convenience, we have included a `voxceleb` module for generating the appropriate input dataframe for SVEva Fair from the VoxCeleb Trainer results and metadata. The results can be reproduced with the code and models made available by voxceleb trainer. For evaluation we use scores for the speaker pairs from the 'H' test set.
-
-```
-import sveva_fair.voxceleb as sveva_vox
-
-score_file = 'example/resnetse34v2_H/eval_scores.csv'
-meta_file = 'example/vox1_meta.csv'
-df = sveva_vox.voxceleb_scores_with_demographics(score_file, meta_file, sep='\t')
-df.rename(columns={"ref_gender": "sex", "ref_nationality":"nationality"}, inplace=True)
-```
-
-#### 2. Evaluate the results 
-The evaluation functions return false negative rates (FNR), false positive rates (FPR) and the corresponding threshold values for speaker verification scores stored in dataset `df`. `df` must have a column with scores `df['sc']` and a column with labels `df['lab']`. The `sg_` function determines these values for subgroups that are specified in a list of column names passed to the filter_keys argument.
+Pass the score and config file to the `SpeakerBiastTest` class and run the `audit()` (TODO Link to documentation) function.
 
 ```
-all_fpfnth, all_metrics = sveva_evaluate.fpfnth_metrics(df)
-sg_fpfnth, sg_metrics = sveva_evaluate.sg_fpfnth_metrics(df, filter_keys=['nationality','sex'])
+import bt4vt
+
+score_file = "resnetse34v2_H-eval_scores.csv"
+config_file = "config.yaml"
+
+test1 = bt4vt.core.SpeakerBiasTest(score_file, config_file)
+
+test1.audit()
 ```
 
-In addition to the FPR, FNR and threshold values, the functions also return a dictionary with metrics: `min_cdet`, the minimum of the detection cost function, and `eer`, the equal error rate. The following optional arguments can be passed to the evaluation functions to adjust the detection cost to the application requirements:
-```
-dcf_p_target [float]: detection cost function target (default = 0.05)
-dcf_c_fn [float]: detection cost function false negative weight (default = 1)
-dcf_c_fp [float]: detection cost function  false positive weight (default = 1)
-```
+Test results will be stored in `~/bias_tests_4_voice_tech/results`. The results file contains metrics ratios for the metrics and speaker groups specified in the config file. 
 
-#### 3. Plot Detection Error Trade-off curves
+### Under Development
 
-```
-g = sveva_plot.plot_det_curves(sg_fpfnth, hue='sex', style='sex', col='nationality') 
-g = sveva_plot.plot_det_baseline(g, all_fpfnth, all_metrics, threshold_type='min_cdet_threshold')
-g = sveva_plot.plot_thresholds(g, sg_fpfnth, sg_metrics, threshold_type='min_cdet_threshold', 
-                                metrics_baseline=all_metrics)
-```
-<img src="example/figures/resnetse34v2_det_nationality.png" alt="example DET curves" height=220 align="centre"/>  
+The project is under constant development and planned enhancements will include advanced plotting of test results and metrics implementation. 
 
-```
-g = sveva_plot.plot_det_curves(sg_fpfnth, hue='nationality', col='sex', linewidth=1.25,
-                               palette=cc.glasbey_category10[:len(sg_fpfnth['nationality'].unique())]) 
-g = sveva_plot.plot_det_baseline(g, all_fpfnth, all_metrics, 'min_cdet_threshold')
-g = sveva_plot.plot_thresholds(g, all_fpfnth, all_metrics, 'min_cdet_threshold', min_threshold=['overall'], 
-                                metrics_baseline=all_metrics)
-```
-<img src="example/figures/resnetse34v2_det_sex.png" alt="example DET curves" height=220 align="centre"/>  
+If you'd like to get involved, have a look at this page: https://www.faireva.org/get-involved 
 
+### Resources and Citation
+
+This work is based on SVEva Fair. Full details on SVEva Fair and a case study that evaluates the fairness of benchmark models trained with the VoxCeleb Trainer benchmark are available here:
+
+*Toussaint, W. and Ding, A. 2021. “SVEva Fair: A Framework for Evaluating Fairness in Speaker Verification.”, https://arxiv.org/abs/2107.12049* 
+
+### License
+
+This code is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This software is distributed in the hope that it will be useful, but without any warranty; without even the implied warranty of merchantability or fitness for a particular purpose. See the GNU General Public License for details.
+
+You should have received a copy of the GNU General Public License along with this source code. If not, go the following link: http://www.gnu.org/licenses/.

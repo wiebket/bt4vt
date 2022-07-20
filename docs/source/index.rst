@@ -18,7 +18,6 @@ Welcome to bt4vt's documentation!
    evaluate
    groups
    metrics
-   plot
 
 
 

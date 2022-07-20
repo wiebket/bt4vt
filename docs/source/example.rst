@@ -2,19 +2,15 @@
 Example
 =======
 
-Below is an example for using bt4vt. All code and data for reproducing the example are contained in the [example](example) directory.
-The example evaluates the fairness of models released with the `VoxCeleb Trainer <https://github.com/clovaai/voxceleb_trainer>`_ benchmark.
-For convenience, we have included a `voxceleb` module for generating the appropriate input dataframe for bt4vt from the VoxCeleb Trainer results and metadata.
-The results can be reproduced with the code and models made available by voxceleb trainer.
-For evaluation we use scores for the speaker pairs from the `H` test set:
+Below is an example for using **bt4vt**. All code and data for reproducing the example are contained in the *bias_tests_4_voice_tech* folder in your home directory. The example evaluates the fairness of models released with the `VoxCeleb Trainer <https://github.com/clovaai/voxceleb_trainer>`_ benchmark.
 
-Evaluate speaker verification performance across subgroups
-__________________________________________________________
+Run Bias Tests for Speaker Verification
+_______________________________________
 
 1. Create config file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A template for the config.yaml file is provided in the example folder::
+A template for the config.yaml file is provided in the *bias_tests_4_voice_tech/example/* folder in your home directory::
 
     speaker_metadata_file: "~/bias_tests_4_voice_tech/example/vox1_meta.csv"
     results_dir: "~/bias_tests_4_voice_tech/results/"
@@ -40,7 +36,9 @@ A template for the config.yaml file is provided in the example folder::
 
 2. Run the bias test audit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-::
+Import **bt4vt** and specify your score and config file path.
+
+Pass the score and config file to the :py:class:`bt4vt.core.SpeakerBiasTest` class and run the :py:func:`bt4vt.core.SpeakerBiasTest.audit` function::
 
     import bt4vt
 
@@ -49,3 +47,4 @@ A template for the config.yaml file is provided in the example folder::
     test1 = bt4vt.core.SpeakerBiasTest(score_file, config_file)
     test1.audit()
 
+Test results will be stored in *~/bias_tests_4_voice_tech/results*. The results file contains metrics ratios for the metrics and speaker groups specified in the config file.

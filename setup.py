@@ -14,7 +14,7 @@ setuptools.setup(
     version="0.1",
     author="Wiebke Toussaint, Anna Leschanowsky",
     author_email="w.toussaint@tudelft.nl",
-    description="Bias Test for Voice Technologies",
+    description="Bias Tests for Voice Technologies",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/wiebket/bt4vt",
