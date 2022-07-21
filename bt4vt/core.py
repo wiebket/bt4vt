@@ -23,7 +23,7 @@ class BiasTest:
 
         return self
 
-    def audit(self):
+    def run_tests(self):
 
         return
 
@@ -41,7 +41,7 @@ class BiasTest:
 
 
 class SpeakerBiasTest(BiasTest):
-    """ The primary purpose of the SpeakerBiasTest class is the implementation of the audit() method, which performs the bias tests.
+    """ The primary purpose of the SpeakerBiasTest class is the implementation of the run_tests() method, which performs the bias tests.
 
         :param scores: Either path to csv or txt file or a Pandas DataFrame that includes information on the reference and test utterances as well as corresponding labels and scores
         :type scores: str or DataFrame
@@ -154,7 +154,7 @@ class SpeakerBiasTest(BiasTest):
 
         return
 
-    def audit(self):
+    def run_tests(self):
         """ Main method of the SpeakerBiasTest class which performs bias evaluation and tests.
         This function calls :py:func:`evaluate.evaluate_scores` from :py:mod:`evaluate.py` for the overall dataset.
         Later subgroups are constructed using :py:func:`groups.split_scores_by_speaker_groups` from :py:mod:`groups.py`.

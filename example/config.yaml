@@ -16,7 +16,7 @@ scores_column: "sc"
 
 dataset_evaluation: True
 
-# for audit
+# for run_tests
 dcf_costs: [[0.05, 1, 1]]
 
 

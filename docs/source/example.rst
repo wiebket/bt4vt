@@ -55,7 +55,7 @@ A template for the ``config.yaml`` file is provided in the ``bias_tests_4_voice_
 
     dataset_evaluation: True
 
-    # for audit
+    # for run_tests
     dcf_costs: [[0.05, 1, 1]]
 
 
@@ -63,13 +63,13 @@ A template for the ``config.yaml`` file is provided in the ``bias_tests_4_voice_
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Import ``bt4vt`` and specify your score and config file path.
 
-Pass the score and config file path to the :py:class:`bt4vt.core.SpeakerBiasTest` class and run the :py:func:`bt4vt.core.SpeakerBiasTest.audit` function::
+Pass the score and config file path to the :py:class:`bt4vt.core.SpeakerBiasTest` class and run the :py:func:`bt4vt.core.SpeakerBiasTest.run_tests` function::
 
     import bt4vt
 
     score_file = "~/bias_tests_4_voice_tech/example/resnetse34v2_H-eval_scores.csv"
     config_file = "~/bias_tests_4_voice_tech/example/config.yaml"
     test1 = bt4vt.core.SpeakerBiasTest(score_file, config_file)
-    test1.audit()
+    test1.run_tests()
 
 Test results will be stored in ``~/bias_tests_4_voice_tech/results``. The results file contains metrics ratios for the metrics and speaker groups specified in the config file.
