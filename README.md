@@ -1,8 +1,8 @@
-# bt4vt - Bias Tests for Voice Technologies: Building fair voice systems
+# Bias Tests for Voice Technologies (bt4vt)
 
 ## About this package
 
-Voice-based systems are widely adopted in users' devices, homes and vehicles as well as in the commerical field, i.e. in call centers or banks. Thus, it is important that they work reliably for all users. Speaker verification is one of the largely deployed voice technologies within these systems that relies on machine learning.
+Voice-based systems are widely adopted in users' devices, homes and vehicles as well as in the commerical field, i.e. in call centers or banks. Thus, it is important that they work reliably for all users. Voice technologies within these systems rely on machine learning.
 Fair machine learning is necessary for these technologies to be free from bias and discrimnation against users with protected attributes, like race and ethnicity, sex, religion and belief, age, disability, or sexual orientation.
 
 `bt4vt` is an actionable and model-agnostic framework for evaluating the fairness of voice technology components (currently limited to speaker verification). 
