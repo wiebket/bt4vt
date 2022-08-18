@@ -76,7 +76,7 @@ test1.run_tests()
 
 Test results will be stored in `~/bias_tests_4_voice_tech/results`. The results file contains *metrics ratios* for the metrics and speaker groups specified in the config file. 
 
-The *metrics ratio* is calculated as '''speaker group metric / average metric'''
+The *metrics ratio* is calculated as ```speaker group metric / average metric```.
 
 ### Under Development
 
