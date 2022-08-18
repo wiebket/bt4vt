@@ -2,7 +2,7 @@
 
 ## About this package
 
-`bt4vt` is a python library to diagnose performance discrepancies (i.e. bias) in speaker verification models (to be extended to other speech processing tasks in future; speak to us if you're interested to help). The library provides evaluation measures and visualisations to interrogate model performance and can be integrated into development pipelines to test for bias.
+`bt4vt` is a python library to diagnose performance discrepancies (i.e. bias) in speaker verification models. The library provides evaluation measures and visualisations to interrogate model performance and can be integrated into development pipelines to test for bias. We plan to extend the library to other speech processing tasks in future. Speak to us if you're interested to help.
 
 [Read the docs](https://bt4vt.readthedocs.io/en/latest/)
 
@@ -74,7 +74,9 @@ test1 = bt4vt.core.SpeakerBiasTest(score_file, config_file)
 test1.run_tests()
 ```
 
-Test results will be stored in `~/bias_tests_4_voice_tech/results`. The results file contains metrics ratios for the metrics and speaker groups specified in the config file. 
+Test results will be stored in `~/bias_tests_4_voice_tech/results`. The results file contains *metrics ratios* for the metrics and speaker groups specified in the config file. 
+
+The *metrics ratio* is calculated as '''speaker group metric / average metric'''
 
 ### Under Development
 

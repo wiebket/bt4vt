@@ -147,7 +147,8 @@ def compute_metrics_ratios(metrics):
 
     """
     metrics_ratios = metrics.iloc[1:, 1:].div(metrics['overall'], axis=0)
-    # save speaker groups
+    metrics_ratios.insert(0, 'thresholds', metrics['thresholds'])
+    # transfer speaker groups from metrics to metrics_ratios
     metrics_ratios.loc[0] = metrics.loc[0]
 
     return metrics_ratios

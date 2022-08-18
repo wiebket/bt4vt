@@ -95,11 +95,11 @@ class SpeakerBiasTest(BiasTest):
 
         # dataset_evaluation will later be turned into a results file rather than a log file
         if self.config["dataset_evaluation"]:
-            self.__dataset_eval_log_file = "dataset_eval_" + config_file_name + "_" + scores_file_name + ".log"
+            self._dataset_eval_log_file = "dataset_eval_" + config_file_name + "_" + scores_file_name + ".log"
         else:
-            self.__dataset_eval_log_file = None
+            self._dataset_eval_log_file = None
 
-        self.__biastest_results_file = "biastest_results_" + config_file_name + "_" + scores_file_name + ".csv"
+        self._biastest_results_file = "biastest_results_" + config_file_name + "_" + scores_file_name + ".csv"
 
     def _check_input(self, scores_input, speaker_metadata_input):
         """ Check that requirements for performing evaluation are fulfilled e.g. parameters of scores, speaker metadata and config are specified correctly
@@ -175,7 +175,7 @@ class SpeakerBiasTest(BiasTest):
         self.metrics['thresholds'] = ["thresholds"] + metric_thresholds
         self.metrics['overall'] = ["overall"] + metric_scores
 
-        # for metrics first row is eer, after that follow order of self.config.dcf_costs
+        # for metrics first row is EER, after that follow order of self.config.dcf_costs
 
         # Calculate metrics for each group
         self.scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'])
@@ -198,19 +198,20 @@ class SpeakerBiasTest(BiasTest):
                 # for metrics first row is eer, after that follow order of self.config.dcf_costs
                 self.metrics[subgroup] = [group] + metric_scores
 
-        # do bias test and bring metrics ratios in long format
-        metrics_ratios = compute_metrics_ratios(self.metrics)
-        metrics_ratios = metrics_ratios.transpose()
-        metrics_ratios.index.name = 'Subgroup'
-        metrics_ratios.columns = ["Speaker_Group", "EER"] + ["DCF" + str(cost) for cost in self.config["dcf_costs"]]
-        metrics_ratios.reset_index(inplace=True)
+        # format metrics and metrics ratios
+        metrics_ratios = compute_metrics_ratios(self.metrics).T
+        metrics_ratios.columns = ["speaker_groups", "EER ratio"] + ["DCF ratio " + str(cost) for cost in self.config["dcf_costs"]]
 
-        # write metrics ratios to biastest results file
-        write_data(metrics_ratios, self.config["results_dir"] + self.__biastest_results_file)
+        metrics_out = self.metrics.T
+        metrics_out.columns = ["speaker_groups", "EER"] + ["DCF " + str(cost) for cost in self.config["dcf_costs"]]
+        output = metrics_out.rename_axis('group_name').reset_index().merge(metrics_ratios.rename_axis('group_name').reset_index())
+
+        # write metrics and metrics ratios to biastest results file
+        write_data(output, self.config["results_dir"] + self._biastest_results_file)
 
         # calculate a bias test score: function in metrics which takes output of compute_metrics_ratios
 
-        print("Bias test finished. Results saved to " + self.__biastest_results_file)
+        print("Bias test finished. Results saved to " + self.config["results_dir"]+self._biastest_results_file)
 
         return
 
@@ -225,6 +226,6 @@ class SpeakerBiasTest(BiasTest):
     def evaluate_dataset(self):
 
         # TODO: implement method
-        evaluate_scores_by_speaker_groups(self.scores_by_speaker_groupsm, self.__dataset_eval_log_file)
+        evaluate_scores_by_speaker_groups(self.scores_by_speaker_groups, self._dataset_eval_log_file)
 
         return
