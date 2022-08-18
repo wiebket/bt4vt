@@ -23,9 +23,9 @@ sys.path.insert(0, str(projroot))
 
 # -- Project information -----------------------------------------------------
 
-project = 'SVEva Fair'
+project = 'bt4vt'
 copyright = '2021, Wiebke Toussaint'
-author = 'Wiebke Toussaint'
+author = 'Wiebke Toussaint, Anna Leschanowsky'
 
 # The full version, including alpha/beta/rc tags
 release = '0.0.1'
@@ -39,6 +39,8 @@ release = '0.0.1'
 extensions = [
     'sphinx_rtd_theme',
     'sphinx.ext.autodoc',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.mathjax',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

@@ -1,9 +1,9 @@
-.. SVEva Fair documentation master file, created by
+.. bt4vt documentation master file, created by
    sphinx-quickstart on Mon Nov 15 15:16:58 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to SVEva Fair's documentation!
+Welcome to bt4vt's documentation!
 ======================================
 
 .. toctree::
@@ -13,9 +13,11 @@ Welcome to SVEva Fair's documentation!
    intro
    install
    example
+   core
+   dataio
    evaluate
-   plot
-   voxceleb
+   groups
+   metrics
 
 
 

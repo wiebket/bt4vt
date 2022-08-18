@@ -1,5 +1,5 @@
 Evaluate
 ========
 
-.. automodule:: sveva_fair.evaluate
+.. automodule:: bt4vt.evaluate
    :members:
