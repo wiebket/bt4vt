@@ -132,21 +132,21 @@ def compute_cdet_at_threshold(fprs, fnrs, thresholds, threshold_value, dcf_p_tar
 
 #########################################
 # In this section we compute bias metrics
-# 1. Ratio of group mincdet / overall mincdet
-# 2. Ratio of group fp, fn rates / overall fp, fn rates
+# 1. Ratio of group mincdet / average mincdet
+# 2. Ratio of group fp, fn rates / average fp, fn rates
 #########################################
 
 def compute_metrics_ratios(metrics):
-    """Computation of metric ratios defined as the subgroup metric scores divided by the overall metric score.
+    """Computation of metric ratios defined as the subgroup metric scores divided by the average metric score.
 
-    :param metrics: DataFrame that contains metric scores for the overall evaluation and subgroup evaluations. The first row corresponds to the eer, all other rows correspond to the min_cdet scores with weights specified in the config file
+    :param metrics: DataFrame that contains metric scores for the average evaluation and subgroup evaluations. The first row corresponds to the eer, all other rows correspond to the min_cdet scores with weights specified in the config file
     :type metrics: DataFrame
 
     :returns: metric_ratios
     :rtype: DataFrame
 
     """
-    metrics_ratios = metrics.iloc[1:, 1:].div(metrics['overall'], axis=0)
+    metrics_ratios = metrics.iloc[1:, 1:].div(metrics['average'], axis=0)
     metrics_ratios.insert(0, 'thresholds', metrics['thresholds'])
     # transfer speaker groups from metrics to metrics_ratios
     metrics_ratios.loc[0] = metrics.loc[0]

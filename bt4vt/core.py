@@ -168,12 +168,12 @@ class SpeakerBiasTest(BiasTest):
 
         print("Running bias test on scores")
 
-        # Calculate overall metrics
+        # Calculate average metrics
         fprs, fnrs, thresholds, metric_scores, metric_thresholds = evaluate_scores(self.scores['score'], self.scores['label'], self.config['dcf_costs'])
-        self.error_rates_by_speaker_group.update({"overall": pd.DataFrame({'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})})
+        self.error_rates_by_speaker_group.update({"average": pd.DataFrame({'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})})
         # add string to prepare for SpeakerGroup row
         self.metrics['thresholds'] = ["thresholds"] + metric_thresholds
-        self.metrics['overall'] = ["overall"] + metric_scores
+        self.metrics['average'] = ["average"] + metric_scores
 
         # for metrics first row is EER, after that follow order of self.config.dcf_costs
 

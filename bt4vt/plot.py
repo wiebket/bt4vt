@@ -14,7 +14,7 @@ import scipy as sp
 from .metrics import get_fpfn_at_threshold
 
 
-def plot_det_curves(fprs, fnrs, subgroup="overall"):
+def plot_det_curves(fprs, fnrs, subgroup="average"):
     """ [summary]
 
     :param fpfnth: must contain false negative rates ['fnrs'] and false positive rates ['fprs'].
@@ -86,9 +86,9 @@ def plot_det_baseline(g, fpfnth_baseline, metrics_baseline, threshold_type, **kw
 
 
 
-def plot_thresholds(g, fpfnth, metrics, threshold_type, min_threshold=['subgroup','overall'], metrics_baseline=None, **kwargs): #TO DO: change to thresholds
+def plot_thresholds(g, fpfnth, metrics, threshold_type, min_threshold=['subgroup','average'], metrics_baseline=None, **kwargs): #TO DO: change to thresholds
     """
-    Add subgroup and overall thresholds at minimium threshold_type to every DET curve subplot of an existing seaborn FacetGrid.
+    Add subgroup and average thresholds at minimium threshold_type to every DET curve subplot of an existing seaborn FacetGrid.
 
     :param g: created for example with plot_det_curves()
     :type g: FacetGrid
@@ -100,7 +100,7 @@ def plot_thresholds(g, fpfnth, metrics, threshold_type, min_threshold=['subgroup
     :type threshold_type: list
     :param metrics_baseline:
     :type metrics_baseline: list
-    :param min_threshold: valid items are 'subgroup', 'overall'. Plot thresholds at subgroup and overall minimum threshold value respectively.
+    :param min_threshold: valid items are 'subgroup', 'average'. Plot thresholds at subgroup and average minimum threshold value respectively.
     :type min_threshold: list
     :param \**kwargs: Passed to g.axes.flat.scatter()
     :type \**kwargs: s (size=100), marker (='x')
@@ -135,18 +135,18 @@ def plot_thresholds(g, fpfnth, metrics, threshold_type, min_threshold=['subgroup
                         subplot.scatter(x=sg_fpfn_min_cdet[0], y=sg_fpfn_min_cdet[1], label=threshold_type+' for '+col.lower()+'_'+li, 
                                         c=line_colors[li], s=kwargs_s, marker=kwargs_marker)
                         
-                    if 'overall' in min_threshold:
-                        sg_fpfn_overall_min_cdet = fpfn_min_threshold(fpfnth[(fpfnth[filter_by_1]==li) & (fpfnth[filter_by_2]==col)],
+                    if 'average' in min_threshold:
+                        sg_fpfn_average_min_cdet = fpfn_min_threshold(fpfnth[(fpfnth[filter_by_1]==li) & (fpfnth[filter_by_2]==col)],
                                                                  metrics_baseline[threshold_type], ppf_norm=True)
-                        subplot.scatter(x=sg_fpfn_overall_min_cdet[0], y=sg_fpfn_overall_min_cdet[1], label=threshold_type+' for all', 
+                        subplot.scatter(x=sg_fpfn_average_min_cdet[0], y=sg_fpfn_average_min_cdet[1], label=threshold_type+' for all',
                                         c=line_colors[li], s=75, marker='^')
                 except:
                     pass
                 
     else:
         for li in lines:
-            fpfn_overall_min_cdet = fpfn_min_threshold(fpfnth[fpfnth[filter_by_1]==li], metrics[li][threshold_type], ppf_norm=True)
-            g.axes[0][0].scatter(x=fpfn_overall_min_cdet[0], y=fpfn_overall_min_cdet[1], label=threshold_type+' for '+li, 
+            fpfn_average_min_cdet = fpfn_min_threshold(fpfnth[fpfnth[filter_by_1]==li], metrics[li][threshold_type], ppf_norm=True)
+            g.axes[0][0].scatter(x=fpfn_average_min_cdet[0], y=fpfn_average_min_cdet[1], label=threshold_type+' for '+li,
                                  c=line_colors[li], s=75, marker='^')
         
     return g

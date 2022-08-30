@@ -27,9 +27,9 @@ def compute_fpfnth(scores, labels):
 
 
 def evaluate_scores(scores, labels, dcf_costs, threshold_values=None):
-    """ Evaluation of scores for the overall dataset and for specified speaker groups. In the overall case no threshold_values are provided.
+    """ Evaluation of scores for the overall dataset and for specified speaker groups. In the average case no threshold_values are provided.
         Threshold values are used to compute the detection cost function for specified speaker groups.
-        The function returns False Positive Rates, False Negative Rates and corresponding thresholds as well as the corresponding metric scores. In the overall case, metric thresholds are returned in addition.
+        The function returns False Positive Rates, False Negative Rates and corresponding thresholds as well as the corresponding metric scores. In the average case, metric thresholds are returned in addition.
 
         :param scores: Series of scores
         :type scores: pandas.Series
@@ -54,7 +54,7 @@ def evaluate_scores(scores, labels, dcf_costs, threshold_values=None):
     metric_scores.append(eer)
     metric_thresholds.append(eer_threshold)
     # TODO: error handling check that dcf_cost is not empty
-    # this is the overall case
+    # this is the average case
     if threshold_values is None:
         for cost in dcf_costs:
             min_cdet, min_cdet_threshold = compute_min_cdet(fprs, fnrs, thresholds, cost[0], cost[1], cost[2])
