@@ -4,9 +4,10 @@
 
 `bt4vt` is a python library to diagnose performance discrepancies (i.e. bias) in speaker verification models. The library provides evaluation measures and visualisations to interrogate model performance and can be integrated into development pipelines to test for bias. We plan to extend the library to other speech processing tasks in future. Speak to us if you're interested to help.
 
-[Read the docs](https://bt4vt.readthedocs.io/en/latest/)
+<a href="https://bt4vt.readthedocs.io/en/latest/" target="_blank">Read the docs</a>
 
-The development of this open source library is part of the [Fair EVA](https://www.faireva.org/) project.
+The development of this open source library is part of the <a href="https://www.faireva.org/" target="_blank">Fair EVA</a>
+project.
 
 ## Setup instructions
 You need `python 3` to use this library.
