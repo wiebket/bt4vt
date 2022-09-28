@@ -72,6 +72,7 @@ class SpeakerBiasTest(BiasTest):
                                                    self.config["reference_filepath_column"]: "ref",
                                                    self.config["test_filepath_column"]: "test",
                                                    self.config["scores_column"]: "score"})
+        self.scores = self.scores.astype({"ref":str,"test":str})
         # speaker_metadata_input column selection, reordering, renaming id
         metadata_selection_list = self.config["select_columns"]
         metadata_selection_list.insert(0, self.config["id_column"])
