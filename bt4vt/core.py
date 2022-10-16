@@ -236,7 +236,7 @@ class SpeakerBiasTest(BiasTest):
         output = metrics_out.rename_axis('group_name').reset_index().merge(metrics_ratios.rename_axis('group_name').reset_index())
 
         # write metrics and metrics ratios to biastest results file
-        write_data(output, self.config["results_dir"] + self._biastest_results_file)
+        write_data(output, os.path.join(self.config["results_dir"], self._biastest_results_file))
 
         # calculate a bias test score: function in metrics which takes output of compute_metrics_ratios
 
