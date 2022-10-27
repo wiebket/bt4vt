@@ -7,7 +7,7 @@
 <a href="https://bt4vt.readthedocs.io/en/latest/" target="_blank">Read the docs</a>
 
 The development of this open source library is part of the <a href="https://www.faireva.org/" target="_blank">Fair EVA</a>
-project.
+project and has been supported by the Mozilla Technology Fund.
 
 ## Setup instructions
 You need `python 3` to use this library.
