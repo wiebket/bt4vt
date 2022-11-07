@@ -1,0 +1,22 @@
+speaker_metadata_file: "./test/configfile_tests/test_5a.csv"
+results_dir: "./test/configfile_tests/results/"
+
+# for metadata
+id_column: "VoxCeleb1 ID"
+select_columns: "Gender"
+speaker_groups: [["Gender"]]
+
+# for scores
+reference_filepath_column: "ref_file"
+test_filepath_column: "com_file"
+label_column: "lab"
+scores_column: "sc"
+
+# for dataset evaluation
+
+dataset_evaluation: True
+
+# for run_tests
+dcf_costs: [[0.05, 1, 1]]
+
+
