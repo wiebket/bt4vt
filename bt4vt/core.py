@@ -7,6 +7,7 @@
 import pandas as pd
 import numpy as np
 import os
+import sys
 from datetime import datetime
 from pathlib import Path
 from .dataio import load_config, load_data, write_data
@@ -117,41 +118,68 @@ class SpeakerBiasTest(BiasTest):
         try:
             self.config["id_column"]
         except KeyError:
-            print("id_column is missing in config file")
+            print("Error: id_column not specified in config file")
+            sys.exit(1)
 
         try:
             self.config["select_columns"]
         except KeyError:
-            print("select_columns is missing in config file")
+            print("Error: select_columns not specified in config file")
+            sys.exit(1)
 
         try:
             self.config["speaker_groups"]
         except KeyError:
-            print("speaker_groups is missing in config file")
+            print("Error: speaker_groups not specified in config file")
+            sys.exit(1)
 
         speaker_group_list = [speaker_group for group_sublist in self.config["speaker_groups"] for speaker_group in group_sublist]
         speaker_group_list = np.unique(speaker_group_list)
         for speaker_group in speaker_group_list:
-            if speaker_group not in self.config["select_columns"]:
-                print(speaker_group + " not in select_columns")
+            try:
+                self.config["select_columns"].index(speaker_group)
+            except ValueError:
+                print("Error: " + speaker_group + " not found in select_columns as specified in config file")
+                sys.exit(1)
 
         # check scores_input
-        if self.config["reference_filepath_column"] not in scores_input.columns:
-            print("reference file name as specified in config file was not found in scores")
-        if self.config["test_filepath_column"] not in scores_input.columns:
-            print("test file name as specified in config file was not found in scores")
-        if self.config["label_column"] not in scores_input.columns:
-            print("label as specified in config file was not found in scores")
-        if self.config["scores_column"] not in scores_input.columns:
-            print("scores as specified in config file were not found in scores")
+        try:
+            list(scores_input.columns).index(self.config["reference_filepath_column"])
+        except ValueError:
+            print("Error: reference filepath column '" + self.config["reference_filepath_column"] + "' as specified in config file not found in scores file")
+            sys.exit(1)
+
+        try:
+            list(scores_input.columns).index(self.config["test_filepath_column"])
+        except ValueError:
+            print("Error: test filepath column '" + self.config["test_filepath_column"] + "' as specified in config file not found in scores file")
+            sys.exit(1)
+
+        try:
+            list(scores_input.columns).index(self.config["label_column"])
+        except ValueError:
+            print("Error: label column '" + self.config["label_column"] + "' as specified in config file not found in scores file")
+            sys.exit(1)
+
+        try:
+            list(scores_input.columns).index(self.config["scores_column"])
+        except ValueError:
+            print("Error: scores column '" + self.config["scores_column"] + "' as specified in config file not found in scores file")
+            sys.exit(1)
 
         # check metadata_input
-        if self.config["id_column"] not in speaker_metadata_input.columns:
-            print("id_column as specified in config file was not found in metadata file")
+        try:
+            list(speaker_metadata_input.columns).index(self.config["id_column"])
+        except ValueError:
+            print("Error: id column '" + self.config["id_column"] + "' as specified in config file not found in metadata file")
+            sys.exit(1)
 
         for select_column in self.config["select_columns"]:
-            if select_column not in speaker_metadata_input.columns:
-                print(select_column + " as specified in config file was not found in metadata file")
+            try:
+                list(speaker_metadata_input.columns).index(select_column)
+            except ValueError:
+                print("Error: '" + select_column + "' in select_columns as specified in config file not found in metadata file")
+                sys.exit(1)
 
         return
 
@@ -208,7 +236,7 @@ class SpeakerBiasTest(BiasTest):
         output = metrics_out.rename_axis('group_name').reset_index().merge(metrics_ratios.rename_axis('group_name').reset_index())
 
         # write metrics and metrics ratios to biastest results file
-        write_data(output, self.config["results_dir"] + self._biastest_results_file)
+        write_data(output, os.path.join(self.config["results_dir"], self._biastest_results_file))
 
         # calculate a bias test score: function in metrics which takes output of compute_metrics_ratios
 
