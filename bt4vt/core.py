@@ -56,7 +56,7 @@ class SpeakerBiasTest(BiasTest):
         """Constructor method
         """
         self.error_rates_by_speaker_group = dict()
-        self.metrics = pd.DataFrame()
+        self.metrics = dict()
 
         self.config = load_config(config_file)
         scores_input = load_data(scores)
@@ -198,48 +198,50 @@ class SpeakerBiasTest(BiasTest):
         print("Running bias test on scores")
 
         # Calculate average metrics
-        fprs, fnrs, thresholds, metric_scores, metric_thresholds = evaluate_scores(self.scores['score'], self.scores['label'], self.config['dcf_costs'])
+        fprs, fnrs, thresholds, metric_scores_dict, metric_thresholds_dict = evaluate_scores(self.scores['score'], self.scores['label'], 
+                                                                                   self.config['fpr_values'], self.config['dcf_costs'],  
+                                                                                   threshold_values=None)
         self.error_rates_by_speaker_group.update({"average": pd.DataFrame({'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})})
         # add string to prepare for SpeakerGroup row
-        self.metrics['thresholds'] = ["thresholds"] + metric_thresholds
-        self.metrics['average'] = ["average"] + metric_scores
+        self.metrics['thresholds'] = {'thresholds': metric_thresholds_dict}
+        self.metrics['average'] = {'average': metric_scores_dict}
 
-        # for metrics first row is EER, after that follow order of self.config.dcf_costs
-
-        # Calculate metrics for each group
+        # Calculate metrics for each group at the 'average' thresholds
         self.scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'])
         for group in self.scores_by_speaker_groups:
+            self.metrics[group] = dict()
             for subgroup in self.scores_by_speaker_groups[group]:
                 label_score_list = self.scores_by_speaker_groups[group][subgroup]
                 labels, scores = zip(*label_score_list)
                 if any(np.isnan(labels)) or any(np.isnan(scores)):
                     continue
+                
+                fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['fpr_values'], self.config['dcf_costs'], 
+                                                                        threshold_values=self.metrics['thresholds']['thresholds'])
 
-                fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['dcf_costs'], threshold_values=self.metrics['thresholds'])
-
-                # TODO: Wiebke to check on different dimensions for subgroups for fprs, fnrs, thresholds
-                # if group in keys add to existing DataFrame otherwise create new key
+                # if group in keys add to existing DataFrame, otherwise create new key
                 if group in self.error_rates_by_speaker_group.keys():
-                    self.error_rates_by_speaker_group[group] = pd.concat([self.error_rates_by_speaker_group[group], pd.DataFrame({'Subgroup': subgroup, 'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})])
+                    self.error_rates_by_speaker_group[group] = pd.concat([self.error_rates_by_speaker_group[group], 
+                                                                          pd.DataFrame({'Subgroup': subgroup, 'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})])
                 else:
                     self.error_rates_by_speaker_group.update({group: pd.DataFrame({'Subgroup': subgroup, 'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})})
 
                 # for metrics first row is eer, after that follow order of self.config.dcf_costs
-                self.metrics[subgroup] = [group] + metric_scores
+                self.metrics[group][subgroup] = metric_scores
 
         # format metrics and metrics ratios
-        metrics_ratios = compute_metrics_ratios(self.metrics).T
-        metrics_ratios.columns = ["speaker_groups", "EER ratio"] + ["DCF ratio " + str(cost) for cost in self.config["dcf_costs"]]
+        # metrics_ratios = compute_metrics_ratios(self.metrics).T # --> remove and do this separately
+        # metrics_ratios.columns = ["speaker_groups", "EER ratio"] + ["minCDet ratio " + str(cost) for cost in self.config["dcf_costs"]]
 
         metrics_out = self.metrics.T
-        metrics_out.columns = ["speaker_groups", "EER"] + ["DCF " + str(cost) for cost in self.config["dcf_costs"]]
-        output = metrics_out.rename_axis('group_name').reset_index().merge(metrics_ratios.rename_axis('group_name').reset_index())
+        metrics_out.columns = ["speaker_groups", "EER"] + ["minCDet" + str(cost) for cost in self.config["dcf_costs"]]
+        output = metrics_out.rename_axis('group_name').reset_index()#.merge(metrics_ratios.rename_axis('group_name').reset_index())
 
         # write metrics and metrics ratios to biastest results file
         write_data(output, os.path.join(self.config["results_dir"], self._biastest_results_file))
 
         # calculate a bias test score: function in metrics which takes output of compute_metrics_ratios
-
+        # do this separately
         print("Bias test finished. Results saved to " + self.config["results_dir"]+self._biastest_results_file)
 
         return

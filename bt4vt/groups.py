@@ -65,4 +65,5 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
 
             label_score_list = scores_filtered[["label", "score"]].to_records(index=False)
             scores_by_speaker_groups["_".join(subgroup_per_group.keys())].update({"_".join(combination): label_score_list})
+    
     return scores_by_speaker_groups

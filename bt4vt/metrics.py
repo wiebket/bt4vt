@@ -68,6 +68,37 @@ def compute_min_cdet(fprs, fnrs, thresholds, dcf_p_target, dcf_c_fp, dcf_c_fn):
     return min_cdet, min_cdet_threshold
 
 
+def get_fnthreshold_at_fp(fprs, fnrs, thresholds, fpr_value, ppf_norm=False):
+    """Get the False Negative Rate and threshold at a given False Positive Rate value.
+
+    :param fprs: Array of False Positive Rates
+    :type fprs: ndarray
+    :param fnrs: Array of False Negative Rates
+    :type fnrs: ndarray
+    :param thresholds: Array of Threshold values corresponding to fprs and fnrs
+    :type thresholds: ndarray
+    :param fpr_value: False positive rate value to get fnr and threshold for
+    :type fpr_value: float
+    :param ppf_norm: normalise the fpr and fnr values to the percent point function. Default is set to False.
+    :type ppf_norm: bool
+
+    :returns: fnr_at_fpr, threshold_at_fpr
+    :rtype: float, float
+
+    """
+    # Find the index in df that is closest to the required fpr value
+    fpr_diff = np.array([abs(i - fpr_value) for i in fprs])
+
+    if ppf_norm:
+        threshold_at_fpr = sp.stats.norm.ppf(thresholds)[np.ndarray.argmin(fpr_diff)]
+        fnr_at_fpr = sp.stats.norm.ppf(fnrs)[np.ndarray.argmin(fpr_diff)]
+    else:
+        threshold_at_fpr = thresholds[np.ndarray.argmin(fpr_diff)]
+        fnr_at_fpr = fnrs[np.ndarray.argmin(fpr_diff)]
+
+    return fnr_at_fpr, threshold_at_fpr
+
+
 def get_fpfn_at_threshold(fprs, fnrs, thresholds, threshold_value, ppf_norm=False):
     """Get the False Positive Rate and False Negative Rate at a given threshold value.
 
