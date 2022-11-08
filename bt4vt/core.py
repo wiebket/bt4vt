@@ -55,7 +55,7 @@ class SpeakerBiasTest(BiasTest):
                  config_file):
         """Constructor method
         """
-        self.error_rates_by_speaker_group = dict()
+        
         self.metrics = dict()
 
         self.config = load_config(config_file)
@@ -201,7 +201,7 @@ class SpeakerBiasTest(BiasTest):
         fprs, fnrs, thresholds, metric_scores_dict, metric_thresholds_dict = evaluate_scores(self.scores['score'], self.scores['label'], 
                                                                                    self.config['fpr_values'], self.config['dcf_costs'],  
                                                                                    threshold_values=None)
-        self.error_rates_by_speaker_group.update({"average": pd.DataFrame({'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})})
+        
         # add string to prepare for SpeakerGroup row
         self.metrics['thresholds'] = {'thresholds': metric_thresholds_dict}
         self.metrics['average'] = {'average': metric_scores_dict}
@@ -215,29 +215,23 @@ class SpeakerBiasTest(BiasTest):
                 labels, scores = zip(*label_score_list)
                 if any(np.isnan(labels)) or any(np.isnan(scores)):
                     continue
-                
+
                 fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['fpr_values'], self.config['dcf_costs'], 
                                                                         threshold_values=self.metrics['thresholds']['thresholds'])
+                self.metrics[group][subgroup] = metric_scores        
 
-                # if group in keys add to existing DataFrame, otherwise create new key
-                if group in self.error_rates_by_speaker_group.keys():
-                    self.error_rates_by_speaker_group[group] = pd.concat([self.error_rates_by_speaker_group[group], 
-                                                                          pd.DataFrame({'Subgroup': subgroup, 'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})])
-                else:
-                    self.error_rates_by_speaker_group.update({group: pd.DataFrame({'Subgroup': subgroup, 'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})})
-
-                # for metrics first row is eer, after that follow order of self.config.dcf_costs
-                self.metrics[group][subgroup] = metric_scores
-
-        # format metrics and metrics ratios
-        # metrics_ratios = compute_metrics_ratios(self.metrics).T # --> remove and do this separately
-        # metrics_ratios.columns = ["speaker_groups", "EER ratio"] + ["minCDet ratio " + str(cost) for cost in self.config["dcf_costs"]]
-
-        metrics_out = self.metrics.T
-        metrics_out.columns = ["speaker_groups", "EER"] + ["minCDet" + str(cost) for cost in self.config["dcf_costs"]]
-        output = metrics_out.rename_axis('group_name').reset_index()#.merge(metrics_ratios.rename_axis('group_name').reset_index())
+        metrics_list = []
+        for group_name in self.metrics.keys():
+            for group_category in self.metrics[group_name].keys():
+                m_cols = ['group_name', 'group_category'] # currently not using m_cols; should construct dict and then append to dataframe based on keys & col names
+                m = [group_name, group_category]
+                for k,v in self.metrics[group_name][group_category].items():
+                    m_cols.append(k)
+                    m.append(v)
+                metrics_list.append(m)
 
         # write metrics and metrics ratios to biastest results file
+        output = pd.DataFrame(metrics_list, columns=['group_name', 'group_category']+list(self.metrics['thresholds']['thresholds'].keys()))
         write_data(output, os.path.join(self.config["results_dir"], self._biastest_results_file))
 
         # calculate a bias test score: function in metrics which takes output of compute_metrics_ratios
