@@ -55,8 +55,6 @@ class SpeakerBiasTest(BiasTest):
                  config_file):
         """Constructor method
         """
-        
-        self.metrics = dict()
 
         self.config = load_config(config_file)
         scores_input = load_data(scores)
@@ -74,6 +72,7 @@ class SpeakerBiasTest(BiasTest):
                                                    self.config["test_filepath_column"]: "test",
                                                    self.config["scores_column"]: "score"})
         self.scores = self.scores.astype({"ref":"str","test":"str"})
+        
         # speaker_metadata_input column selection, reordering, renaming id
         metadata_selection_list = self.config["select_columns"]
         metadata_selection_list.insert(0, self.config["id_column"])
@@ -85,12 +84,12 @@ class SpeakerBiasTest(BiasTest):
             scores_file_name = Path(scores).stem
         elif isinstance(scores, pd.DataFrame):
             date = datetime.now()
-            scores_file_name = date.strftime("%d_%m_%Y_%H_%M_%S")
+            scores_file_name = date.strftime("%d%m%Y-%H%M%S")
         else:
             # TODO: error handling
             scores_file_name = None
 
-        # check if results directory exists
+        # create results directory if it does not exists
         results_dir = self.config["results_dir"]
         if not os.path.isdir(os.path.expanduser(results_dir)):
             os.mkdir(os.path.expanduser(results_dir))
@@ -101,7 +100,8 @@ class SpeakerBiasTest(BiasTest):
         else:
             self._dataset_eval_log_file = None
 
-        self._biastest_results_file = "biastest_results_" + config_file_name + "_" + scores_file_name + ".csv"
+        self._biastest_results_file = config_file_name + "_" + scores_file_name + ".csv"
+        
 
     def _check_input(self, scores_input, speaker_metadata_input):
         """ Check that requirements for performing evaluation are fulfilled e.g. parameters of scores, speaker metadata and config are specified correctly
@@ -128,12 +128,12 @@ class SpeakerBiasTest(BiasTest):
             sys.exit(1)
 
         try:
-            self.config["speaker_groups"]
+            self.config["group_names"]
         except KeyError:
-            print("Error: speaker_groups not specified in config file")
+            print("Error: group_names not specified in config file")
             sys.exit(1)
 
-        speaker_group_list = [speaker_group for group_sublist in self.config["speaker_groups"] for speaker_group in group_sublist]
+        speaker_group_list = [speaker_group for group_sublist in self.config["group_names"] for speaker_group in group_sublist]
         speaker_group_list = np.unique(speaker_group_list)
         for speaker_group in speaker_group_list:
             try:
@@ -183,6 +183,7 @@ class SpeakerBiasTest(BiasTest):
 
         return
 
+    
     def run_tests(self):
         """ Main method of the SpeakerBiasTest class which performs bias evaluation and tests.
         This function calls :py:func:`evaluate.evaluate_scores` from :py:mod:`evaluate.py` for the overall dataset.
@@ -196,6 +197,8 @@ class SpeakerBiasTest(BiasTest):
         """
 
         print("Running bias test on scores")
+        
+        metrics = dict()
 
         # Calculate average metrics
         fprs, fnrs, thresholds, metric_scores_dict, metric_thresholds_dict = evaluate_scores(self.scores['score'], self.scores['label'], 
@@ -203,13 +206,13 @@ class SpeakerBiasTest(BiasTest):
                                                                                    threshold_values=None)
         
         # add string to prepare for SpeakerGroup row
-        self.metrics['thresholds'] = {'thresholds': metric_thresholds_dict}
-        self.metrics['average'] = {'average': metric_scores_dict}
+        metrics['thresholds'] = {'thresholds': metric_thresholds_dict}
+        metrics['average'] = {'average': metric_scores_dict}
 
         # Calculate metrics for each group at the 'average' thresholds
-        self.scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'])
+        self.scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['group_names'])
         for group in self.scores_by_speaker_groups:
-            self.metrics[group] = dict()
+            metrics[group] = dict()
             for subgroup in self.scores_by_speaker_groups[group]:
                 label_score_list = self.scores_by_speaker_groups[group][subgroup]
                 labels, scores = zip(*label_score_list)
@@ -217,22 +220,23 @@ class SpeakerBiasTest(BiasTest):
                     continue
 
                 fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['fpr_values'], self.config['dcf_costs'], 
-                                                                        threshold_values=self.metrics['thresholds']['thresholds'])
-                self.metrics[group][subgroup] = metric_scores        
+                                                                        threshold_values=metrics['thresholds']['thresholds'])
+                metrics[group][subgroup] = metric_scores        
 
         metrics_list = []
-        for group_name in self.metrics.keys():
-            for group_category in self.metrics[group_name].keys():
+        for group_name in metrics.keys():
+            for group_category in metrics[group_name].keys():
                 m_cols = ['group_name', 'group_category'] # currently not using m_cols; should construct dict and then append to dataframe based on keys & col names
                 m = [group_name, group_category]
-                for k,v in self.metrics[group_name][group_category].items():
+                for k,v in metrics[group_name][group_category].items():
                     m_cols.append(k)
                     m.append(v)
                 metrics_list.append(m)
 
-        # write metrics and metrics ratios to biastest results file
-        output = pd.DataFrame(metrics_list, columns=['group_name', 'group_category']+list(self.metrics['thresholds']['thresholds'].keys()))
+        # write metrics to biastest results file
+        output = pd.DataFrame(metrics_list, columns=['group_name', 'group_category']+list(metrics['thresholds']['thresholds'].keys()))        
         write_data(output, os.path.join(self.config["results_dir"], self._biastest_results_file))
+        self.metrics = output
 
         # calculate a bias test score: function in metrics which takes output of compute_metrics_ratios
         # do this separately
