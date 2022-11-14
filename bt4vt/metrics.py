@@ -6,6 +6,7 @@
 
 import numpy as np
 import scipy as sp
+import pandas as pd
 
 #########################################
 # In this section we compute performance evaluation metrics
@@ -162,31 +163,98 @@ def compute_cdet_at_threshold(fprs, fnrs, thresholds, threshold_value, dcf_p_tar
 
 
 #########################################
-# In this section we compute bias metrics
-# 1. Ratio of group mincdet / average mincdet
-# 2. Ratio of group fp, fn rates / average fp, fn rates
+# In this section we compute bias measures based on ratios and differences of performance metrics
 #########################################
 
-def compute_metrics_ratios(metrics):
-    """Computation of metric ratios defined as the subgroup metric scores divided by the average metric score.
+class BiasMeasures:
+    
+    def __init__(self, metrics_df:pd.DataFrame, group_names:list):
+        
+        self.metrics_df = metrics_df
+        self.group_names = group_names
 
-    :param metrics: DataFrame that contains metric scores for the average evaluation and subgroup evaluations. The first row corresponds to the eer, all other rows correspond to the min_cdet scores with weights specified in the config file
-    :type metrics: DataFrame
+        return     
+    
 
-    :returns: metric_ratios
-    :rtype: DataFrame
+    def subgroup_to_average_ratio(self):
 
+        df = self.metrics_df.set_index(['group_name','group_category'])
+        ratios = df.loc[self.group_names].div(df.loc[['average']].values[0], axis=1)
+        ratios.reset_index(inplace=True)
+
+        return ratios
+
+
+    def log_subgroup_to_average_ratio(self):
+
+        ratios = self.subgroup_to_average_ratio()
+        ratios.set_index(['group_name','group_category'], inplace=True)
+        log_ratios = np.log(ratios)
+        log_ratios.reset_index(inplace=True)
+
+        return log_ratios
+
+
+    def subgroup_to_average_difference(self):
+
+        df = self.metrics_df.set_index(['group_name','group_category'])
+        differences = df.loc[self.group_names].sub(df.loc[['average']].values[0], axis=1)
+        differences.reset_index(inplace=True)
+
+        return differences
+
+
+    def absolute_subgroup_to_average_difference(self):
+
+        differences = self.subgroup_to_average_difference()
+        differences.set_index(['group_name','group_category'], inplace=True)
+        abs_differences = np.abs(differences)
+        abs_differences.reset_index(inplace=True)
+
+        return abs_differences
+
+
+    def subgroup_distance_to_group_min(self):
+        
+        df = self.metrics_df.set_index(['group_name','group_category'])
+        dist_to_min = df.loc[self.group_names] - df.loc[self.group_names].groupby('group_name').transform('min')
+        dist_to_min.reset_index(inplace=True)
+
+        return dist_to_min
+    
+
+# Meta-measures 
+
+def fairness_discrepancy_rate(fpr_dist_to_min:pd.Series, fnr_dist_to_min:pd.Series, alpha:float):
     """
-    metrics_ratios = metrics.iloc[1:, 1:].div(metrics['average'], axis=0)
-    metrics_ratios.insert(0, 'thresholds', metrics['thresholds'])
-    # transfer speaker groups from metrics to metrics_ratios
-    metrics_ratios.loc[0] = metrics.loc[0]
+    This function implements the fairness discrepancy rate (FDR) measure introduced in the paper
+    'Fairness in Biometrics: A Figure of Merit to Assess Biometric Verification Systems' https://doi.org/10.1109/TBIOM.2021.3102862
+    
+    Use BiasMeasures.subgroup_distance_to_group_min() to get fpr_dist_to_min and fnr_dist_to_min. This guarantess that distances values
+    are always positive, and no absolute value needs to be taken. Must select on threshold and one group_name for which to calculate the fdr.
+    """
+    
+    max_A = max(fpr_dist_to_min) #
+    max_B = max(fnr_dist_to_min)
+    
+    fdr = 1 - (alpha*max_A + (1 - alpha)*max_B)
 
-    return metrics_ratios
-
-
-def compute_fpfn_ratio(fpfnth, metrics, metrics_baseline, filter_keys: list, threshold_type):
-
-    # nice function for future to understand the real life impact of threshold settings
-
-    return
+    return fdr
+        
+        
+        
+def reliability_bias(metric_log_ratios:pd.Series, weights:pd.Series=None):
+    """
+    This function implements the reliablity bias measure as introduced in the paper
+    'Tiny, always-on and fragile: Bias propagation through design choices in on-device machine learning workflows' https://arxiv.org/abs/2201.07677
+    
+    Use BiasMeasures.log_subgroup_to_average_ratio() to get metric_log_ratios. Must select on metric (i.e. column) and one group_name
+    for which to calculate reliability bias.
+    """
+    
+    if weights is not None:
+        metric_log_ratios = metric_log_ratios*weights
+        
+    reliability_bias = sum(abs(metric_log_ratios))
+    
+    return reliability_bias

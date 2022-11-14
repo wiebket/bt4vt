@@ -13,7 +13,6 @@ from pathlib import Path
 from .dataio import load_config, load_data, write_data
 from .evaluate import evaluate_scores
 from .groups import split_scores_by_speaker_groups
-from .metrics import compute_metrics_ratios
 from .dataset_evaluate import evaluate_scores_by_speaker_groups
 #from .plot import plot_det_curves
 
@@ -22,7 +21,7 @@ class BiasTest:
 
     def __init__(self):
 
-        return self
+        return 
 
     def run_tests(self):
 
@@ -189,7 +188,7 @@ class SpeakerBiasTest(BiasTest):
         This function calls :py:func:`evaluate.evaluate_scores` from :py:mod:`evaluate.py` for the overall dataset.
         Later subgroups are constructed using :py:func:`groups.split_scores_by_speaker_groups` from :py:mod:`groups.py`.
         These subgroup scores are again evaluated using :py:func:`evaluate.evaluate_scores`.
-        Lastly metric ratios are computed calling :py:func:`metrics.compute_metrics_ratios` from :py:mod:`metrics.py`.
+        Lastly bias measures are computed calling :py:func:`metrics.BiasMeasures` from :py:mod:`metrics.py`.
 
         :returns: biastest_results_file to the results directory as specified in config.yaml, the name of the file contains the config filename and the scores filename. If a scores dataframe was provided instead of a scores filename the results file contains the date and time of the evaluation
         :rtype: csv_file
@@ -238,7 +237,7 @@ class SpeakerBiasTest(BiasTest):
         write_data(output, os.path.join(self.config["results_dir"], self._biastest_results_file))
         self.metrics = output
 
-        # calculate a bias test score: function in metrics which takes output of compute_metrics_ratios
+        # calculate a bias measures
         # do this separately
         print("Bias test finished. Results saved to " + self.config["results_dir"]+self._biastest_results_file)
 
