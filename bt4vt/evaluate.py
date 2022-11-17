@@ -13,7 +13,7 @@ def compute_fpfnth(scores, labels):
 
     :param scores: Series of scores
     :type scores: pandas.Series
-    :param labels: Series of labels
+    :param labels: Series of labels; labels have to be either {-1,1} or {0,1}
     :type labels: pandas.Series
 
     :returns: fprs, fnrs, thresholds

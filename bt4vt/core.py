@@ -44,7 +44,7 @@ class BiasTest:
 class SpeakerBiasTest(BiasTest):
     """ The primary purpose of the SpeakerBiasTest class is the implementation of the run_tests() method, which performs the bias tests.
 
-        :param scores: Either path to csv or txt file or a Pandas DataFrame that includes information on the reference and test utterances as well as corresponding labels and scores
+        :param scores: Either path to csv or txt file or a Pandas DataFrame that includes information on the reference and test utterances as well as corresponding labels and scores; labels have to be either {-1,1} or {0,1}
         :type scores: str or DataFrame
         :param config_file: path to yaml config file
         :type config_file: str
