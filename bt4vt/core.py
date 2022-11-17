@@ -85,6 +85,7 @@ class SpeakerBiasTest(BiasTest):
         speaker_metadata_input.dropna(inplace=True)
 
         self.speaker_metadata = speaker_metadata_input.rename(columns={self.config["id_column"]: "id"})
+        self.speaker_metadata = self.speaker_metadata.astype({"id":"str"})
 
         config_file_name = Path(config_file).stem
         if isinstance(scores, str):
