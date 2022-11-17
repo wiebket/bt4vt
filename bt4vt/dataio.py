@@ -53,7 +53,7 @@ def load_config(file_name):
 
 def write_data(data, file_name):
 
-    data.to_csv(file_name, index=False)
+    data.to_csv(file_name, index=False, na_rep="NaN")
 
     return
 
