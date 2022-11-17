@@ -78,6 +78,12 @@ class SpeakerBiasTest(BiasTest):
         metadata_selection_list = self.config["select_columns"]
         metadata_selection_list.insert(0, self.config["id_column"])
         speaker_metadata_input = speaker_metadata_input[metadata_selection_list]
+        # delete metadata rows that include NaN, None or Empty Strings in selected columns
+        speaker_metadata_input.replace('', np.nan)
+        if speaker_metadata_input.isnull().values.any():
+            print("Selected Columns in Metadata File contain NaN, Nones or Empty Strings. We recommend a dataset evaluation.")
+        speaker_metadata_input.dropna()
+
         self.speaker_metadata = speaker_metadata_input.rename(columns={self.config["id_column"]: "id"})
 
         config_file_name = Path(config_file).stem
