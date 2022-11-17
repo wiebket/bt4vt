@@ -17,8 +17,6 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
     :type speaker_metadata: DataFrame
     :param speaker_groups: List of speaker groups as specified in config file
     :type speaker_groups: list
-    :param log_file: filename of dataset evaluation log file, if not None dataset evaluation information is written to the log file
-    :type log_file: str or None
 
     :returns: scores_by_speaker_groups
     :rtype: dict
