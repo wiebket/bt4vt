@@ -59,6 +59,13 @@ class SpeakerBiasTest(BiasTest):
         self.metrics = pd.DataFrame()
 
         self.config = load_config(config_file)
+        try:
+            self.config["id_delimiter"]
+        except:
+            self.id_delimiter = "/"
+        else:
+            self.id_delimiter = self.config["id_delimiter"]
+
         scores_input = load_data(scores)
         speaker_metadata_input = load_data(self.config['speaker_metadata_file'])
 
@@ -214,7 +221,7 @@ class SpeakerBiasTest(BiasTest):
         # for metrics first row is EER, after that follow order of self.config.dcf_costs
 
         # Calculate metrics for each group
-        self.scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'])
+        self.scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'], id_delimiter=self.id_delimiter)
         for group in self.scores_by_speaker_groups:
             for subgroup in self.scores_by_speaker_groups[group]:
                 label_score_list = self.scores_by_speaker_groups[group][subgroup]
