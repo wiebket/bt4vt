@@ -11,6 +11,7 @@ reference_filepath_column: "ref_file"
 test_filepath_column: "com_file"
 label_column: "lab"
 scores_column: "sc"
+id_delimiter: "-"
 
 # for dataset evaluation
 
