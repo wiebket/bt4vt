@@ -147,6 +147,12 @@ class SpeakerBiasTest(BiasTest):
             print("Error: speaker_groups not specified in config file")
             sys.exit(1)
 
+        if not isinstance(self.config["select_columns"], list):
+            raise ValueError("Select Columns in config file must be a list")
+
+        if not all(isinstance(el, list) for el in self.config["speaker_groups"]):
+            raise ValueError("Speaker Groups in config file must be a list of lists")
+
         speaker_group_list = [speaker_group for group_sublist in self.config["speaker_groups"] for speaker_group in group_sublist]
         speaker_group_list = np.unique(speaker_group_list)
         for speaker_group in speaker_group_list:

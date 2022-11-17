@@ -7,6 +7,7 @@
 import pandas as pd
 import yaml
 import os
+import sys
 
 
 def load_data(data_in):
@@ -46,7 +47,14 @@ def load_config(file_name):
         config = yaml.safe_load(file)
 
         # conversion to tuple as safe_load does not load tuples
-        config["dcf_costs"] = [tuple(v) for v in config["dcf_costs"]]
+        if not all(isinstance(el, list) for el in config["dcf_costs"]):
+            raise ValueError("DCF Costs in config file must be a list of lists")
+
+        try:
+            config["dcf_costs"] = [tuple(v) for v in config["dcf_costs"]]
+        except TypeError:
+            print("Error: DCF costs in config file must be a list of lists containing float values")
+            sys.exit(1)
 
     return config
 
