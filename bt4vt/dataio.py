@@ -46,11 +46,13 @@ def load_config(file_name):
     with open(os.path.expanduser(file_name), 'r') as file:
         config = yaml.safe_load(file)
 
-        # conversion to tuple as safe_load does not load tuples
+        # check if list of lists
         if not all(isinstance(el, list) for el in config["dcf_costs"]):
             raise ValueError("DCF Costs in config file must be a list of lists")
 
+        # check if tuple conversion works
         try:
+            # conversion to tuple as safe_load does not load tuples
             config["dcf_costs"] = [tuple(v) for v in config["dcf_costs"]]
         except TypeError:
             print("Error: DCF costs in config file must be a list of lists containing float values")

@@ -127,7 +127,6 @@ class SpeakerBiasTest(BiasTest):
 
         """
 
-        # TODO error handling, at the moment only simple print messages
         # check config file
         try:
             self.config["id_column"]
@@ -161,6 +160,11 @@ class SpeakerBiasTest(BiasTest):
             except ValueError:
                 print("Error: " + speaker_group + " not found in select_columns as specified in config file")
                 sys.exit(1)
+
+        # check if dcf costs PTarget is between 0 and 1
+        for dcf_costs in self.config["dcf_costs"]:
+            if (dcf_costs[0] <= 0.0) | (dcf_costs[0] >= 1.0):
+                raise Exception("PTarget in DCF Costs needs to be between 0 and 1")
 
         # check scores_input
         try:
