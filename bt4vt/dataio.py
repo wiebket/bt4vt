@@ -42,8 +42,11 @@ def load_config(file_name):
     :rtype: dict
 
     """
+    if not file_name.lower().endswith("yaml"):
+        raise Exception("Config File has to be a YAML file with .yaml extension")
 
     with open(os.path.expanduser(file_name), 'r') as file:
+
         config = yaml.safe_load(file)
 
         # check if list of lists
