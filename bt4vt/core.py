@@ -236,10 +236,15 @@ class SpeakerBiasTest(BiasTest):
             for subgroup in self.scores_by_speaker_groups[group]:
                 label_score_list = self.scores_by_speaker_groups[group][subgroup]
                 labels, scores = zip(*label_score_list)
-                if any(np.isnan(labels)) or any(np.isnan(scores)):
-                    continue
-
-                fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['dcf_costs'], threshold_values=self.metrics['thresholds'])
+                if all(np.isnan(labels)) or all(np.isnan(scores)):
+                    fprs = []
+                    fnrs = []
+                    thresholds = []
+                    metric_scores = np.empty((len(self.config["dcf_costs"]) + 1))
+                    metric_scores[:] = np.nan
+                    metric_scores = metric_scores.tolist()
+                else:
+                    fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['dcf_costs'], threshold_values=self.metrics['thresholds'])
 
                 # TODO: Wiebke to check on different dimensions for subgroups for fprs, fnrs, thresholds
                 # if group in keys add to existing DataFrame otherwise create new key
