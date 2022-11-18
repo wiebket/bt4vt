@@ -1,0 +1,7 @@
+group_name,speaker_groups,EER,"DCF (0.05, 1, 1)",EER ratio,"DCF ratio (0.05, 1, 1)"
+thresholds,thresholds,-1.0756698846817017,-1.0756698846817017,-1.0756698846817017,-1.0756698846817017
+average,average,0.0,0.0,NaN,NaN
+m_Ireland,Gender_Nationality,0.0,0.0,NaN,NaN
+m_USA,Gender_Nationality,NaN,NaN,NaN,NaN
+f_Ireland,Gender_Nationality,NaN,NaN,NaN,NaN
+f_USA,Gender_Nationality,0.0,0.0,NaN,NaN
