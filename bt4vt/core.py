@@ -7,6 +7,7 @@
 import pandas as pd
 import numpy as np
 import os
+import sys
 from datetime import datetime
 from pathlib import Path
 from .dataio import load_config, load_data, write_data
@@ -43,7 +44,7 @@ class BiasTest:
 class SpeakerBiasTest(BiasTest):
     """ The primary purpose of the SpeakerBiasTest class is the implementation of the run_tests() method, which performs the bias tests.
 
-        :param scores: Either path to csv or txt file or a Pandas DataFrame that includes information on the reference and test utterances as well as corresponding labels and scores
+        :param scores: Either path to csv or txt file or a Pandas DataFrame that includes information on the reference and test utterances as well as corresponding labels and scores; labels have to be either {-1,1} or {0,1}
         :type scores: str or DataFrame
         :param config_file: path to yaml config file
         :type config_file: str
@@ -58,6 +59,13 @@ class SpeakerBiasTest(BiasTest):
         self.metrics = pd.DataFrame()
 
         self.config = load_config(config_file)
+        try:
+            self.config["id_delimiter"]
+        except:
+            self.id_delimiter = "/"
+        else:
+            self.id_delimiter = self.config["id_delimiter"]
+
         scores_input = load_data(scores)
         speaker_metadata_input = load_data(self.config['speaker_metadata_file'])
 
@@ -77,7 +85,14 @@ class SpeakerBiasTest(BiasTest):
         metadata_selection_list = self.config["select_columns"]
         metadata_selection_list.insert(0, self.config["id_column"])
         speaker_metadata_input = speaker_metadata_input[metadata_selection_list]
+        # delete metadata rows that include NaN, None or Empty Strings in selected columns
+        speaker_metadata_input.replace(' ', np.nan, inplace=True)
+        if speaker_metadata_input.isnull().values.any():
+            print("Selected Columns in Metadata File contain NaNs or Empty Cells. We recommend a dataset evaluation.")
+        speaker_metadata_input.dropna(inplace=True)
+
         self.speaker_metadata = speaker_metadata_input.rename(columns={self.config["id_column"]: "id"})
+        self.speaker_metadata = self.speaker_metadata.astype({"id":"str"})
 
         config_file_name = Path(config_file).stem
         if isinstance(scores, str):
@@ -112,46 +127,83 @@ class SpeakerBiasTest(BiasTest):
 
         """
 
-        # TODO error handling, at the moment only simple print messages
         # check config file
         try:
             self.config["id_column"]
         except KeyError:
-            print("id_column is missing in config file")
+            print("Error: id_column not specified in config file")
+            sys.exit(1)
 
         try:
             self.config["select_columns"]
         except KeyError:
-            print("select_columns is missing in config file")
+            print("Error: select_columns not specified in config file")
+            sys.exit(1)
 
         try:
             self.config["speaker_groups"]
         except KeyError:
-            print("speaker_groups is missing in config file")
+            print("Error: speaker_groups not specified in config file")
+            sys.exit(1)
+
+        if not isinstance(self.config["select_columns"], list):
+            raise ValueError("Select Columns in config file must be a list")
+
+        if not all(isinstance(el, list) for el in self.config["speaker_groups"]):
+            raise ValueError("Speaker Groups in config file must be a list of lists")
 
         speaker_group_list = [speaker_group for group_sublist in self.config["speaker_groups"] for speaker_group in group_sublist]
         speaker_group_list = np.unique(speaker_group_list)
         for speaker_group in speaker_group_list:
-            if speaker_group not in self.config["select_columns"]:
-                print(speaker_group + " not in select_columns")
+            try:
+                self.config["select_columns"].index(speaker_group)
+            except ValueError:
+                print("Error: " + speaker_group + " not found in select_columns as specified in config file")
+                sys.exit(1)
+
+        # check if dcf costs PTarget is between 0 and 1
+        for dcf_costs in self.config["dcf_costs"]:
+            if (dcf_costs[0] <= 0.0) | (dcf_costs[0] >= 1.0):
+                raise Exception("PTarget in DCF Costs needs to be between 0 and 1")
 
         # check scores_input
-        if self.config["reference_filepath_column"] not in scores_input.columns:
-            print("reference file name as specified in config file was not found in scores")
-        if self.config["test_filepath_column"] not in scores_input.columns:
-            print("test file name as specified in config file was not found in scores")
-        if self.config["label_column"] not in scores_input.columns:
-            print("label as specified in config file was not found in scores")
-        if self.config["scores_column"] not in scores_input.columns:
-            print("scores as specified in config file were not found in scores")
+        try:
+            list(scores_input.columns).index(self.config["reference_filepath_column"])
+        except ValueError:
+            print("Error: reference filepath column '" + self.config["reference_filepath_column"] + "' as specified in config file not found in scores file")
+            sys.exit(1)
+
+        try:
+            list(scores_input.columns).index(self.config["test_filepath_column"])
+        except ValueError:
+            print("Error: test filepath column '" + self.config["test_filepath_column"] + "' as specified in config file not found in scores file")
+            sys.exit(1)
+
+        try:
+            list(scores_input.columns).index(self.config["label_column"])
+        except ValueError:
+            print("Error: label column '" + self.config["label_column"] + "' as specified in config file not found in scores file")
+            sys.exit(1)
+
+        try:
+            list(scores_input.columns).index(self.config["scores_column"])
+        except ValueError:
+            print("Error: scores column '" + self.config["scores_column"] + "' as specified in config file not found in scores file")
+            sys.exit(1)
 
         # check metadata_input
-        if self.config["id_column"] not in speaker_metadata_input.columns:
-            print("id_column as specified in config file was not found in metadata file")
+        try:
+            list(speaker_metadata_input.columns).index(self.config["id_column"])
+        except ValueError:
+            print("Error: id column '" + self.config["id_column"] + "' as specified in config file not found in metadata file")
+            sys.exit(1)
 
         for select_column in self.config["select_columns"]:
-            if select_column not in speaker_metadata_input.columns:
-                print(select_column + " as specified in config file was not found in metadata file")
+            try:
+                list(speaker_metadata_input.columns).index(select_column)
+            except ValueError:
+                print("Error: '" + select_column + "' in select_columns as specified in config file not found in metadata file")
+                sys.exit(1)
 
         return
 
@@ -179,17 +231,21 @@ class SpeakerBiasTest(BiasTest):
         # for metrics first row is EER, after that follow order of self.config.dcf_costs
 
         # Calculate metrics for each group
-        self.scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'])
+        self.scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'], id_delimiter=self.id_delimiter)
         for group in self.scores_by_speaker_groups:
             for subgroup in self.scores_by_speaker_groups[group]:
                 label_score_list = self.scores_by_speaker_groups[group][subgroup]
                 labels, scores = zip(*label_score_list)
-                if any(np.isnan(labels)) or any(np.isnan(scores)):
-                    continue
+                if all(np.isnan(labels)) or all(np.isnan(scores)):
+                    fprs = []
+                    fnrs = []
+                    thresholds = []
+                    metric_scores = np.empty((len(self.config["dcf_costs"]) + 1))
+                    metric_scores[:] = np.nan
+                    metric_scores = metric_scores.tolist()
+                else:
+                    fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['dcf_costs'], threshold_values=self.metrics['thresholds'])
 
-                fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['dcf_costs'], threshold_values=self.metrics['thresholds'])
-
-                # TODO: Wiebke to check on different dimensions for subgroups for fprs, fnrs, thresholds
                 # if group in keys add to existing DataFrame otherwise create new key
                 if group in self.error_rates_by_speaker_group.keys():
                     self.error_rates_by_speaker_group[group] = pd.concat([self.error_rates_by_speaker_group[group], pd.DataFrame({'Subgroup': subgroup, 'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})])
@@ -208,7 +264,7 @@ class SpeakerBiasTest(BiasTest):
         output = metrics_out.rename_axis('group_name').reset_index().merge(metrics_ratios.rename_axis('group_name').reset_index())
 
         # write metrics and metrics ratios to biastest results file
-        write_data(output, self.config["results_dir"] + self._biastest_results_file)
+        write_data(output, os.path.join(self.config["results_dir"], self._biastest_results_file))
 
         # calculate a bias test score: function in metrics which takes output of compute_metrics_ratios
 

@@ -7,6 +7,7 @@
 import pandas as pd
 import yaml
 import os
+import sys
 
 
 def load_data(data_in):
@@ -41,19 +42,31 @@ def load_config(file_name):
     :rtype: dict
 
     """
+    if not file_name.lower().endswith("yaml"):
+        raise Exception("Config File has to be a YAML file with .yaml extension")
 
     with open(os.path.expanduser(file_name), 'r') as file:
+
         config = yaml.safe_load(file)
 
-        # conversion to tuple as safe_load does not load tuples
-        config["dcf_costs"] = [tuple(v) for v in config["dcf_costs"]]
+        # check if list of lists
+        if not all(isinstance(el, list) for el in config["dcf_costs"]):
+            raise ValueError("DCF Costs in config file must be a list of lists")
+
+        # check if tuple conversion works
+        try:
+            # conversion to tuple as safe_load does not load tuples
+            config["dcf_costs"] = [tuple(v) for v in config["dcf_costs"]]
+        except TypeError:
+            print("Error: DCF costs in config file must be a list of lists containing float values")
+            sys.exit(1)
 
     return config
 
 
 def write_data(data, file_name):
 
-    data.to_csv(file_name, index=False)
+    data.to_csv(file_name, index=False, na_rep="NaN")
 
     return
 

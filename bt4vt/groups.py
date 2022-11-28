@@ -8,7 +8,7 @@ import itertools
 import numpy as np
 
 
-def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
+def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups, id_delimiter):
     """ Construction of a dictionary that holds a list of tuples (label, score) for the speaker groups as defined in the config file and their corresponding subgroups.
 
     :param scores: DataFrame that contains reference and test utterances and corresponding labels and scores
@@ -17,8 +17,8 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
     :type speaker_metadata: DataFrame
     :param speaker_groups: List of speaker groups as specified in config file
     :type speaker_groups: list
-    :param log_file: filename of dataset evaluation log file, if not None dataset evaluation information is written to the log file
-    :type log_file: str or None
+    :param id_delimiter: If not specified in config file, default is "/"
+    :type id_delimiter: string
 
     :returns: scores_by_speaker_groups
     :rtype: dict
@@ -27,8 +27,8 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
 
     scores_by_speaker_groups = dict()
 
-    # create id column for scores
-    scores['ref_id'] = scores['ref'].apply(lambda x: x.split('/')[0])
+    # create id column for scores, first split by dot to get rid of .wav, then by id_delimiter
+    scores['ref_id'] = scores['ref'].apply(lambda x: x.split(".")[0]).apply(lambda x: x.split(id_delimiter)[0])
 
     for group in speaker_groups:
         subgroup_per_group = dict()
@@ -53,6 +53,7 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
             # subgroup combination not available in speaker_metadata
             if subgroup_dataframe.empty:
                 scores_by_speaker_groups["_".join(subgroup_per_group.keys())].update({"_".join(combination): [(np.nan, np.nan)]})
+                #TODO logging here
                 continue
 
             id_list = subgroup_dataframe["id"]
@@ -61,6 +62,7 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups):
             # speaker id in metadata but no scores provided
             if scores_filtered.empty:
                 scores_by_speaker_groups["_".join(subgroup_per_group.keys())].update({"_".join(combination): [(np.nan, np.nan)]})
+                # TODO Logging here
                 continue
 
             label_score_list = scores_filtered[["label", "score"]].to_records(index=False)
