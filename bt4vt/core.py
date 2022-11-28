@@ -246,7 +246,6 @@ class SpeakerBiasTest(BiasTest):
                 else:
                     fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['dcf_costs'], threshold_values=self.metrics['thresholds'])
 
-                # TODO: Wiebke to check on different dimensions for subgroups for fprs, fnrs, thresholds
                 # if group in keys add to existing DataFrame otherwise create new key
                 if group in self.error_rates_by_speaker_group.keys():
                     self.error_rates_by_speaker_group[group] = pd.concat([self.error_rates_by_speaker_group[group], pd.DataFrame({'Subgroup': subgroup, 'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})])
