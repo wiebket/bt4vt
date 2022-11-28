@@ -189,7 +189,11 @@ class BiasMeasures:
 
         ratios = self.subgroup_to_average_ratio()
         ratios.set_index(['group_name','group_category'], inplace=True)
-        log_ratios = np.log(ratios)
+        
+        # NB: ln(0) = -infinity -> by replacing infinity with 0, we treat the ratio in the same way as a ratio of 1 (i.e. subgroup performance equals average performance)
+        # As all our metrics are error rates, a score of 0 indicates top performance. So this approach will not account for some cases of favoritism
+        # i.e. when a subgroup has a 0 score, it has to be better performance than average (unless average is also 0). However, we treat it as equal performance.
+        log_ratios = np.log(ratios, where=ratios != 0)  
         log_ratios.reset_index(inplace=True)
 
         return log_ratios
@@ -234,7 +238,7 @@ def fairness_discrepancy_rate(fpr_dist_to_min:pd.Series, fnr_dist_to_min:pd.Seri
     are always positive, and no absolute value needs to be taken. Must select on threshold and one group_name for which to calculate the fdr.
     """
     
-    max_A = max(fpr_dist_to_min) #
+    max_A = max(fpr_dist_to_min)
     max_B = max(fnr_dist_to_min)
     
     fdr = 1 - (alpha*max_A + (1 - alpha)*max_B)
@@ -243,7 +247,7 @@ def fairness_discrepancy_rate(fpr_dist_to_min:pd.Series, fnr_dist_to_min:pd.Seri
         
         
         
-def reliability_bias(metric_log_ratios:pd.Series, weights:pd.Series=None):
+def reliability_bias(metric_log_ratios:pd.Series, norm=True, weights:pd.Series=None):
     """
     This function implements the reliablity bias measure as introduced in the paper
     'Tiny, always-on and fragile: Bias propagation through design choices in on-device machine learning workflows' https://arxiv.org/abs/2201.07677
@@ -256,5 +260,8 @@ def reliability_bias(metric_log_ratios:pd.Series, weights:pd.Series=None):
         metric_log_ratios = metric_log_ratios*weights
         
     reliability_bias = sum(abs(metric_log_ratios))
+    
+    if norm is True:
+        reliability_bias = reliability_bias/len(metric_log_ratios)
     
     return reliability_bias

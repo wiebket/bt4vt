@@ -114,6 +114,7 @@ class SpeakerBiasTest(BiasTest):
 
         # TODO error handling, at the moment only simple print messages
         # check config file
+        # check fpr_values (float) and dcf_costs (list of lists)
         try:
             self.config["id_column"]
         except KeyError:
@@ -183,7 +184,7 @@ class SpeakerBiasTest(BiasTest):
         return
 
     
-    def run_tests(self):
+    def run_tests(self, write_output=True):
         """ Main method of the SpeakerBiasTest class which performs bias evaluation and tests.
         This function calls :py:func:`evaluate.evaluate_scores` from :py:mod:`evaluate.py` for the overall dataset.
         Later subgroups are constructed using :py:func:`groups.split_scores_by_speaker_groups` from :py:mod:`groups.py`.
@@ -211,13 +212,13 @@ class SpeakerBiasTest(BiasTest):
         # Calculate metrics for each group at the 'average' thresholds
         self.scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['group_names'])
         for group in self.scores_by_speaker_groups:
+            print(group)
             metrics[group] = dict()
             for subgroup in self.scores_by_speaker_groups[group]:
                 label_score_list = self.scores_by_speaker_groups[group][subgroup]
                 labels, scores = zip(*label_score_list)
                 if any(np.isnan(labels)) or any(np.isnan(scores)):
                     continue
-
                 fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['fpr_values'], self.config['dcf_costs'], 
                                                                         threshold_values=metrics['thresholds']['thresholds'])
                 metrics[group][subgroup] = metric_scores        
@@ -233,13 +234,15 @@ class SpeakerBiasTest(BiasTest):
                 metrics_list.append(m)
 
         # write metrics to biastest results file
-        output = pd.DataFrame(metrics_list, columns=['group_name', 'group_category']+list(metrics['thresholds']['thresholds'].keys()))        
-        write_data(output, os.path.join(self.config["results_dir"], self._biastest_results_file))
+        output = pd.DataFrame(metrics_list, columns=['group_name', 'group_category']+list(metrics['thresholds']['thresholds'].keys()))
+        if write_output is True:
+            write_data(output, os.path.join(self.config["results_dir"], self._biastest_results_file))
+            print("Bias test finished. Results saved to " + self.config["results_dir"]+self._biastest_results_file)
         self.metrics = output
 
         # calculate a bias measures
         # do this separately
-        print("Bias test finished. Results saved to " + self.config["results_dir"]+self._biastest_results_file)
+        
 
         return
 

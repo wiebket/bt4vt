@@ -6,6 +6,7 @@
 
 import sklearn.metrics as sklearn_metrics
 from .metrics import compute_eer, compute_min_cdet, get_fpfn_at_threshold, get_fnthreshold_at_fp, compute_cdet_at_threshold
+import pdb
 
 
 def compute_fpfnth(scores, labels):
@@ -84,7 +85,7 @@ def evaluate_scores(scores, labels, fpr_values, dcf_costs, threshold_values):
                 fpr_at_threshold, fnr_at_threshold = get_fpfn_at_threshold(fprs, fnrs, thresholds, v, ppf_norm=False)
                 metric_scores.extend([fpr_at_threshold, fnr_at_threshold])
                 
-            elif "minCDet" in k:
+            elif "FPR@minCDet" in k:
                 cost = [float(i) for i in k.split('(')[-1].split(')')[0].split(',')]
                 cdet_at_threshold = compute_cdet_at_threshold(fprs, fnrs, thresholds, v, cost[0], cost[1], cost[2])
                 fpr_at_threshold, fnr_at_threshold = get_fpfn_at_threshold(fprs, fnrs, thresholds, v, ppf_norm=False)
