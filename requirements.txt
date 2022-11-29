@@ -8,3 +8,7 @@ seaborn
 setuptools
 speechbrain
 PyYAML
+
+flake8
+pytest
+pytest-cov
