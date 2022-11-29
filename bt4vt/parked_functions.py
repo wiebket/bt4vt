@@ -4,6 +4,9 @@
 # Created on 01-05-2022
 # @author: wiebket, AnnaLesch
 
+import pandas as pd
+
+
 def summarise_dataset(demo_df):
 
     # TODO: clean up file and make independent from voxceleb
@@ -32,6 +35,7 @@ def summarise_dataset(demo_df):
     df.reset_index(inplace=True)
 
     return df
+
 
 def compare_experiments(experiment_dict: dict, comparison: str):
     """[summary]
@@ -99,12 +103,8 @@ def score_overlap(df, metrics):
         eer_threshold = metrics[subgroup]['eer_threshold']
         min_sc = df[(df['subgroup'] == subgroup) & (df['lab'] == 1)]['sc'].min()
         max_sc = df[(df['subgroup'] == subgroup) & (df['lab'] == 0)]['sc'].max()
-        overlap_fn = \
-        df[(df['subgroup'] == subgroup) & (df['lab'] == 1) & (df['sc'] >= min_sc) & (df['sc'] <= eer_threshold)][
-            'sc'].count()
-        overlap_fp = \
-        df[(df['subgroup'] == subgroup) & (df['lab'] == 0) & (df['sc'] >= eer_threshold) & (df['sc'] <= max_sc)][
-            'sc'].count()
+        overlap_fn = df[(df['subgroup'] == subgroup) & (df['lab'] == 1) & (df['sc'] >= min_sc) & (df['sc'] <= eer_threshold)]['sc'].count()
+        overlap_fp = df[(df['subgroup'] == subgroup) & (df['lab'] == 0) & (df['sc'] >= eer_threshold) & (df['sc'] <= max_sc)]['sc'].count()
         overlap_total = overlap_fn + overlap_fp
         total_instances = df[df['subgroup'] == subgroup]['sc'].count()
         overlap_probability = overlap_total / total_instances

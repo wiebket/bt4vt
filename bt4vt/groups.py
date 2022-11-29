@@ -53,7 +53,7 @@ def split_scores_by_speaker_groups(scores, speaker_metadata, speaker_groups, id_
             # subgroup combination not available in speaker_metadata
             if subgroup_dataframe.empty:
                 scores_by_speaker_groups["_".join(subgroup_per_group.keys())].update({"_".join(combination): [(np.nan, np.nan)]})
-                #TODO logging here
+                # TODO logging here
                 continue
 
             id_list = subgroup_dataframe["id"]
