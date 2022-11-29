@@ -1,5 +1,5 @@
-speaker_metadata_file: "./test/scoresfile_tests/test_4.csv"
-results_dir: "./test/scoresfile_tests/results/"
+speaker_metadata_file: "./tests/scoresfile_tests/test_4.csv"
+results_dir: "./tests/scoresfile_tests/results/"
 
 # for metadata
 id_column: "VoxCeleb1 ID"
