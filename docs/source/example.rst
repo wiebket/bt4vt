@@ -41,6 +41,8 @@ A template for the ``config.yaml`` file is provided in the ``bias_tests_4_voice_
     id_column: "VoxCeleb1 ID"
     select_columns: ["Gender", "Nationality"]
     speaker_groups: [["Gender"], ["Nationality"], ["Gender", "Nationality"]]
+    # optional attributes
+    # id_delimiter: "-" (default is "/")
 
     # for scores
     reference_filepath_column: "ref_file"

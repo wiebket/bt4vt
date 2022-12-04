@@ -15,28 +15,42 @@ from .evaluate import evaluate_scores
 from .groups import split_scores_by_speaker_groups
 from .metrics import compute_metrics_ratios
 from .dataset_evaluate import evaluate_scores_by_speaker_groups
-#from .plot import plot_det_curves
 
 
 class BiasTest:
 
+    """ Elementary Class for implementing Bias tests.
+    """
+
     def __init__(self):
+
+        """
+        Constructor method
+        """
 
         return self
 
     def run_tests(self):
 
+        """
+        Runs bias tests. This is an empty method that needs to be implemented by subclasses
+        """
+
         return
 
     def plot(self):
 
-        # TODO: implement method
+        """
+        This is an empty method that can be implemented by subclasses.
+        """
 
         return
 
     def evaluate_dataset(self):
 
-        # TODO: implement method
+        """
+        This is an empty method that can be implemented by subclasses.
+        """
 
         return
 
@@ -269,14 +283,6 @@ class SpeakerBiasTest(BiasTest):
         # calculate a bias test score: function in metrics which takes output of compute_metrics_ratios
 
         print("Bias test finished. Results saved to " + self.config["results_dir"]+self._biastest_results_file)
-
-        return
-
-    def plot(self):
-        """ Plotting of bias test results
-        """
-
-        #plot_det_curves(self.fprs, self.fnrs, subgroup="f_India")
 
         return
 
