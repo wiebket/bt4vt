@@ -27,7 +27,7 @@ def load_data(data_in):
         data = data_in
     else:
         data = None
-        #TODO: error handling
+        # TODO: error handling
 
     return data
 
@@ -69,6 +69,3 @@ def write_data(data, file_name):
     data.to_csv(file_name, index=False, na_rep="NaN")
 
     return
-
-
-

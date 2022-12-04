@@ -56,9 +56,11 @@ class BiasTest:
 
 
 class SpeakerBiasTest(BiasTest):
-    """ The primary purpose of the SpeakerBiasTest class is the implementation of the run_tests() method, which performs the bias tests.
+    """ The primary purpose of the SpeakerBiasTest class is the implementation of the run_tests() method, which performs
+     the bias tests.
 
-        :param scores: Either path to csv or txt file or a Pandas DataFrame that includes information on the reference and test utterances as well as corresponding labels and scores; labels have to be either {-1,1} or {0,1}
+        :param scores: Either path to csv or txt file or a Pandas DataFrame that includes information on the reference
+        and test utterances as well as corresponding labels and scores; labels have to be either {-1,1} or {0,1}
         :type scores: str or DataFrame
         :param config_file: path to yaml config file
         :type config_file: str
@@ -75,7 +77,7 @@ class SpeakerBiasTest(BiasTest):
         self.config = load_config(config_file)
         try:
             self.config["id_delimiter"]
-        except:
+        except KeyError:
             self.id_delimiter = "/"
         else:
             self.id_delimiter = self.config["id_delimiter"]
@@ -94,7 +96,7 @@ class SpeakerBiasTest(BiasTest):
                                                    self.config["reference_filepath_column"]: "ref",
                                                    self.config["test_filepath_column"]: "test",
                                                    self.config["scores_column"]: "score"})
-        self.scores = self.scores.astype({"ref":"str","test":"str"})
+        self.scores = self.scores.astype({"ref": "str", "test": "str"})
         # speaker_metadata_input column selection, reordering, renaming id
         metadata_selection_list = self.config["select_columns"]
         metadata_selection_list.insert(0, self.config["id_column"])
@@ -106,7 +108,7 @@ class SpeakerBiasTest(BiasTest):
         speaker_metadata_input.dropna(inplace=True)
 
         self.speaker_metadata = speaker_metadata_input.rename(columns={self.config["id_column"]: "id"})
-        self.speaker_metadata = self.speaker_metadata.astype({"id":"str"})
+        self.speaker_metadata = self.speaker_metadata.astype({"id": "str"})
 
         config_file_name = Path(config_file).stem
         if isinstance(scores, str):
