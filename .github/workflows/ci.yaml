@@ -28,7 +28,7 @@ jobs:
       
       - name: Test with flake8
         run: |
-          flake8 --statistics
+          flake8 --exit-zero --statistics
           
       - name: Test with pytest
         run: pytest
