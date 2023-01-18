@@ -33,14 +33,14 @@ setuptools.setup(
                  ])],
     packages=setuptools.find_packages(where="bt4vt"),
     install_requires=[
-        'numpy',
+        'numpy>=1.16.5',
         'pandas',
         'PyYAML',
         'scikit_learn',
-        'scipy',
+        'scipy>=1.6',
         'setuptools'
     ],
     setup_requires=['pytest-runner', 'flake8'],
     tests_require=['pytest', 'pytest-cov'],
-    python_requires=">=3.6",
+    python_requires=">=3.7",
 )
