@@ -23,12 +23,4 @@ jobs:
 
       - name: Install
         run: |
-          pip install -r requirements.txt 
-          python setup.py install
-      
-      - name: Test with flake8
-        run: |
-          flake8 --exit-zero --statistics
-          
-      - name: Test with pytest
-        run: pytest
+          python setup.py test

@@ -1,9 +1,0 @@
-numpy
-pandas
-pytest
-PyYAML
-scikit_learn
-scipy
-setuptools
-flake8
-pytest-cov
