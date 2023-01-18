@@ -42,5 +42,5 @@ setuptools.setup(
     ],
     setup_requires=['pytest-runner', 'flake8'],
     tests_require=['pytest', 'pytest-cov'],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
 )
