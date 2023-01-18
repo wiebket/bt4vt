@@ -6,6 +6,7 @@
 
 import numpy as np
 import scipy as sp
+import pandas as pd
 
 #########################################
 # In this section we compute performance evaluation metrics
@@ -147,7 +148,9 @@ def compute_metrics_ratios(metrics):
 
     """
     metrics_ratios = metrics.iloc[1:, 1:].div(metrics['average'], axis=0)
-    metrics_ratios.insert(0, 'thresholds', metrics['thresholds'])
+    #metrics_ratios.insert(0, 'thresholds', metrics['thresholds']) -> use concat to avoid performance issues
+    metrics_ratios = pd.concat([metrics_ratios, metrics["thresholds"].rename("thresholds")], axis=1)
+
     # transfer speaker groups from metrics to metrics_ratios
     metrics_ratios.loc[0] = metrics.loc[0]
 

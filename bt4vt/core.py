@@ -269,7 +269,9 @@ class SpeakerBiasTest(BiasTest):
                     self.error_rates_by_speaker_group.update({group: pd.DataFrame({'Subgroup': subgroup, 'FPRS': fprs, 'FNRS': fnrs, 'Thresholds': thresholds})})
 
                 # for metrics first row is eer, after that follow order of self.config.dcf_costs
-                self.metrics[subgroup] = [group] + metric_scores
+                #self.metrics[subgroup] = [group] + metric_scores -> use concat to avoid performance issues
+                self.metrics = pd.concat([self.metrics, pd.Series([group] + metric_scores).rename(subgroup)], axis=1)
+
 
         # format metrics and metrics ratios
         metrics_ratios = compute_metrics_ratios(self.metrics).T
