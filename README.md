@@ -89,7 +89,7 @@ If you'd like to get involved, have a look at: https://www.faireva.org/get-invol
 
 ### Resources
 
-Early versions of this library were developed for the following research:
+An early versions of this library was developed as part of the following research:
 
 *Wiebke Toussaint Hutiri and Aaron Yi Ding. 2022. Bias in Automated Speaker Recognition. In 2022 ACM Conference on Fairness, Accountability, and Transparency (FAccT '22). Association for Computing Machinery, New York, NY, USA, 230–247. https://doi-org.tudelft.idm.oclc.org/10.1145/3531146.3533089* 
 
