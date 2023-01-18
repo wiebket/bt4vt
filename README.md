@@ -29,11 +29,6 @@ The installation will create the `bias_tests_4_voice_tech` folder in your home d
 
 ## Usage
 
-Import the library into your project
-    ```
-    import bt4vt
-    ```
-
 Below is an example for using `bt4vt`. All code and data for reproducing the example are contained in the `bias_tests_4_voice_tech` folder in your `home` directory. The example evaluates the fairness of models released with the <a href="https://github.com/clovaai/voxceleb_trainer" target="_blank">Clova AI VoxCeleb Trainer</a>.
 
 ### Run Bias Tests for Speaker Verification
@@ -94,7 +89,7 @@ If you'd like to get involved, have a look at: https://www.faireva.org/get-invol
 
 ### Resources and Citation
 
-Early versions of this library were prototyped in the following research:
+Early versions of this library were developed for the following research:
 
 *Wiebke Toussaint Hutiri and Aaron Yi Ding. 2022. Bias in Automated Speaker Recognition. In 2022 ACM Conference on Fairness, Accountability, and Transparency (FAccT '22). Association for Computing Machinery, New York, NY, USA, 230–247. https://doi-org.tudelft.idm.oclc.org/10.1145/3531146.3533089* 
 
