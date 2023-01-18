@@ -87,7 +87,7 @@ The project is under continuous development and we appreciate contributions! Pla
 
 If you'd like to get involved, have a look at: https://www.faireva.org/get-involved 
 
-### Resources and Citation
+### Resources
 
 Early versions of this library were developed for the following research:
 
