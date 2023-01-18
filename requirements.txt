@@ -1,5 +1,5 @@
 numpy
-panda
+pandas
 pytest
 PyYAML
 scikit_learn

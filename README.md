@@ -20,7 +20,7 @@ You need `python 3` to use this library.
 
     ```
     $ pip install -r requirements.txt
-    $ python setup.py install
+    $ pip install .
     ```
     The installation will create the `bias_tests_4_voice_tech` folder in your home directory. It provides an example how to use `bt4vt` and can be deleted if not required. 
 

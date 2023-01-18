@@ -32,5 +32,15 @@ setuptools.setup(
                   for x in files if '.ipynb_checkpoints' not in d and 'figures' not in d
                  ])],
     packages=setuptools.find_packages(where="bt4vt"),
+    install_requires=[
+        'numpy',
+        'pandas',
+        'PyYAML',
+        'scikit_learn',
+        'scipy',
+        'setuptools'
+    ],
+    setup_requires=['pytest-runner', 'flake8'],
+    tests_require=['pytest', 'pytest-cov'],
     python_requires=">=3.6",
 )
