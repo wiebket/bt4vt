@@ -10,26 +10,30 @@ The development of this open source library is part of the <a href="https://www.
 project and has been supported by the Mozilla Technology Fund.
 
 ## Setup instructions
-You need `python 3` to use this library.
+You need `python 3` to use this library. The easiest way to use the library is to install it with pip.
+```
+$ pip install bt4vt
+```
+To use the library in development mode, install it as follows:
 
 1. Clone this repository from github and navigate to the project's root directory (`bt4vt\`)
     ```
     $ git clone https://github.com/wiebket/bt4vt.git
     ```
-2. Install all the requirements and the project.
+2. Install the project.
 
     ```
-    $ pip install -r requirements.txt
-    $ pip install .
+    $ pip install . -e
     ```
-    The installation will create the `bias_tests_4_voice_tech` folder in your home directory. It provides an example how to use `bt4vt` and can be deleted if not required. 
+The installation will create the `bias_tests_4_voice_tech` folder in your home directory. It provides an example how to use `bt4vt` and can be deleted if not required. 
 
-3. Import the library into your project
+## Usage
+
+Import the library into your project
     ```
     import bt4vt
     ```
 
-## Usage
 Below is an example for using `bt4vt`. All code and data for reproducing the example are contained in the `bias_tests_4_voice_tech` folder in your `home` directory. The example evaluates the fairness of models released with the <a href="https://github.com/clovaai/voxceleb_trainer" target="_blank">Clova AI VoxCeleb Trainer</a>.
 
 ### Run Bias Tests for Speaker Verification
