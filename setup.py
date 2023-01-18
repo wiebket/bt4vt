@@ -11,7 +11,7 @@ os.makedirs(example_dir, exist_ok=True)
 
 setuptools.setup(
     name="bt4vt",
-    version="0.1",
+    version="1.0.0",
     author="Wiebke Toussaint, Anna Leschanowsky",
     author_email="w.toussaint@tudelft.nl",
     description="Bias Tests for Voice Technologies",
