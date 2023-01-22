@@ -8,6 +8,7 @@ import pandas as pd
 import yaml
 import os
 import sys
+import importlib.resources
 
 
 def load_data(data_in):
@@ -20,6 +21,10 @@ def load_data(data_in):
     :rtype: DataFrame
 
     """
+    if data_in == "vox1_meta.csv":
+        with importlib.resources.path("bt4vt.data", data_in) as path:
+            data = pd.read_csv(str(path), sep=None, engine="python")
+            return data
 
     if isinstance(data_in, str):
         data = pd.read_csv(data_in, sep=None, engine="python")
