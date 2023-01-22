@@ -14,7 +14,6 @@ To use the library in development mode, install it as follows:
 
 2. Install the project::
 
-    $ pip install . -e
+    $ pip install -e .
 
-The installation will create the ``bias_tests_4_voice_tech`` folder in your home directory. It provides an example how to use ``bt4vt`` and can be deleted if not required
 

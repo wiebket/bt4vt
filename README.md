@@ -23,13 +23,12 @@ To use the library in development mode, install it as follows:
 2. Install the project.
 
     ```
-    $ pip install . -e
+    $ pip install -e .
     ```
-The installation will create the `bias_tests_4_voice_tech` folder in your home directory. It provides an example how to use `bt4vt` and can be deleted if not required. 
-
+   
 ## Usage
 
-Below is an example for using `bt4vt`. All code and data for reproducing the example are contained in the `bias_tests_4_voice_tech` folder in your `home` directory. The example evaluates the fairness of models released with the <a href="https://github.com/clovaai/voxceleb_trainer" target="_blank">Clova AI VoxCeleb Trainer</a>.
+Below is an example for using `bt4vt`. All data for reproducing the example is provided as a package resource. The example evaluates the fairness of models released with the <a href="https://github.com/clovaai/voxceleb_trainer" target="_blank">Clova AI VoxCeleb Trainer</a>.
 
 ### Run Bias Tests for Speaker Verification
 
@@ -38,7 +37,7 @@ Below is an example for using `bt4vt`. All code and data for reproducing the exa
 A template for the `config.yaml` file is provided in the `~/bias_tests_4_voice_tech/example/` folder after package installation.
 
 ```
-    speaker_metadata_file: "~/bias_tests_4_voice_tech/example/vox1_meta.csv"
+    speaker_metadata_file: "vox1_meta.csv"
     results_dir: "~/bias_tests_4_voice_tech/results/"
 
     # for metadata
@@ -61,20 +60,24 @@ A template for the `config.yaml` file is provided in the `~/bias_tests_4_voice_t
 
 #### 2. Run the bias tests 
 
-Import `bt4vt` and specify your score and config file. Pass the score and config file path to the `SpeakerBiastTest` class and run the `run_tests()` function.
+Import `bt4vt` and access the score and config file provided as package resources. Pass the score and config file path to the `SpeakerBiastTest` class and run the `run_tests()` function.
 
 ```
 import bt4vt
+import importlib.resources
 
-score_file = "resnetse34v2_H-eval_scores.csv"
-config_file = "config.yaml"
+with importlib.resources.path("bt4vt.data", "resnetse34v2_H-eval_scores.csv") as path:
+    score_file = str(path)
 
-test1 = bt4vt.core.SpeakerBiasTest(score_file, config_file)
+with importlib.resources.path("bt4vt.data", "config.yaml") as path:
+    config_file = str(path)
 
-test1.run_tests()
+test = bt4vt.core.SpeakerBiasTest(score_file, config_file)
+
+test.run_tests()
 ```
 
-Test results will be stored in `~/bias_tests_4_voice_tech/results`. The results file contains *metrics ratios* for the metrics and speaker groups specified in the config file. 
+When running the test, bt4vt will create `~/bias_tests_4_voice_tech/results` folder and store the test results there. The results file contains *metrics ratios* for the metrics and speaker groups specified in the config file. 
 
 The *metrics ratio* is calculated as ```speaker group metric / average metric```.
 
