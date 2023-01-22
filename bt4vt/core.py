@@ -123,7 +123,7 @@ class SpeakerBiasTest(BiasTest):
         # check if results directory exists
         results_dir = self.config["results_dir"]
         if not os.path.isdir(os.path.expanduser(results_dir)):
-            os.mkdir(os.path.expanduser(results_dir))
+            os.mkdirs(os.path.expanduser(results_dir))
 
         # dataset_evaluation will later be turned into a results file rather than a log file
         if self.config["dataset_evaluation"]:
