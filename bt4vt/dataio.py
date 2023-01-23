@@ -8,8 +8,8 @@ import pandas as pd
 import yaml
 import os
 import sys
-import importlib.resources
 import shutil
+import importlib_resources
 
 
 def load_data(data_in):
@@ -84,8 +84,10 @@ def copy_example(directory, example_name="VoxCeleb"):
 
     if example_name == "VoxCeleb":
 
-        shutil.copytree(importlib.resources.files("bt4vt.data"), directory)
-        print("Example files copied to " + directory)
+        ref = importlib_resources.files("bt4vt.data")
+        with importlib_resources.as_file(ref) as path:
+            shutil.copytree(path, directory)
+            print("Example files copied to " + directory)
 
 
 
