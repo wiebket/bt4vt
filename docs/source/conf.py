@@ -16,10 +16,11 @@
 
 # -- Project import path ----------------------------------------------------
 import sys
+import os
 from pathlib import Path
 
-projroot = Path(__file__).resolve().parent.parent.parent # <this_file>/../../../
-sys.path.insert(0, str(projroot))
+#projroot = Path(__file__).resolve().parent.parent.parent # <this_file>/../../../
+sys.path.insert(0, os.path.abspath('../../bt4vt/'))
 
 # -- Project information -----------------------------------------------------
 
