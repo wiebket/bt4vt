@@ -18,7 +18,7 @@
 import sys
 from pathlib import Path
 
-projroot = Path(__file__).resolve().parent.parent.parent # <this_file>/../../../
+projroot = Path(__file__).resolve().parent.parent # <this_file>/../../../
 sys.path.insert(0, str(projroot))
 
 # -- Project information -----------------------------------------------------
