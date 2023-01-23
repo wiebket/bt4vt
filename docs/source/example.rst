@@ -13,12 +13,12 @@ For now, we copy the resources to ``~/bias_tests_4_voice_tech/example/``::
 
 The following files are now copied to the folder:
 
-bias_tests_4_voice_tech
-├── example
-| ├── config.yaml
-| ├── resnetse34l_H-eval_scores.csv
-| ├── resnetse34v2_H-eval_scores.csv
-| └── vox1_meta.csv
+| bias_tests_4_voice_tech
+| ├── example
+| | ├── config.yaml
+| | ├── resnetse34l_H-eval_scores.csv
+| | ├── resnetse34v2_H-eval_scores.csv
+| | └── vox1_meta.csv
 
 - ``config.yaml`` is an example config file that is needed to run bias tests. More information on how to create a config file can be found below.
 - ``resnetse34v2_H-eval_scores.csv`` and ``resnetse34l_H-eval_scores.csv`` are the evaluation scores for two pretrained baseline models made available by the VoxCeleb Trainer. You can find more information on ResNetSE34V2 `here <https://arxiv.org/abs/2009.14153>`_ and on ResNetSE34L `here <https://doi.org/10.21437/Interspeech.2020-1064>`_.
@@ -26,10 +26,10 @@ bias_tests_4_voice_tech
 
 When running the example, ``bt4vt`` will create a ``bias_tests_4_voice_tech/results`` folder to store the results files.
 
-bias_tests_4_voice_tech
-├── example
-├── results
-│   └── biastest_results_config_resnetse34v2_H-eval_scores.csv
+| bias_tests_4_voice_tech
+| ├── example
+| ├── results
+| │   └── biastest_results_config_resnetse34v2_H-eval_scores.csv
 
 - ``bias_tests_4_voice_tech/results/biastest_results_config_resnetse34v2_H-eval_scores.csv`` is the file where the results of the example will be saved to. It contains metrics ratios and metric results for the metrics and speaker groups specified in the config file and evaluated for ResNetSE34V2 scores.
 
