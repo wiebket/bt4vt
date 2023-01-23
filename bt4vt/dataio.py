@@ -9,6 +9,7 @@ import yaml
 import os
 import sys
 import importlib.resources
+import shutil
 
 
 def load_data(data_in):
@@ -21,10 +22,6 @@ def load_data(data_in):
     :rtype: DataFrame
 
     """
-    if data_in == "vox1_meta.csv":
-        with importlib.resources.path("bt4vt.data", data_in) as path:
-            data = pd.read_csv(str(path), sep=None, engine="python")
-            return data
 
     if isinstance(data_in, str):
         data = pd.read_csv(data_in, sep=None, engine="python")
@@ -74,3 +71,22 @@ def write_data(data, file_name):
     data.to_csv(file_name, index=False, na_rep="NaN")
 
     return
+
+
+def copy_example(directory, example_name="VoxCeleb"):
+    """ Copy the example to a specified directory
+
+    :param directory: Path to the directory where you'd like to copy the example files to
+    :type directory: str
+    :param example_name: Name of the example that should be copied (default is VoxCeleb)
+
+    """
+
+    if example_name == "VoxCeleb":
+
+        shutil.copytree(importlib.resources.files("bt4vt.data"), directory)
+        print("Example files copied to " + directory)
+
+
+
+
