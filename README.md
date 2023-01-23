@@ -28,16 +28,30 @@ To use the library in development mode, install it as follows:
    
 ## Usage
 
-Below is an example for using `bt4vt`. All data for reproducing the example is provided as a package resource. The example evaluates the fairness of models released with the <a href="https://github.com/clovaai/voxceleb_trainer" target="_blank">Clova AI VoxCeleb Trainer</a>.
+Below is an example for using `bt4vt`. All necessary files can be copied by using `copy_example()`. The example evaluates the fairness of models released with the <a href="https://github.com/clovaai/voxceleb_trainer" target="_blank">Clova AI VoxCeleb Trainer</a>.
 
 ### Run Bias Tests for Speaker Verification
 
-#### 1. Create config file
+### 1. Copy example resources
 
-A template for the `config.yaml` file is provided in the `~/bias_tests_4_voice_tech/example/` folder after package installation.
+All files that are necessary to reproduce the example can be copied to a folder of your choice. Here, we copy the resources to `~/bias_tests_4_voice_tech/example/`.
 
 ```
-    speaker_metadata_file: "vox1_meta.csv"
+    import bt4vt
+
+    bt4vt.dataio.copy_example("~/bias_tests_4_voice_tech/example/")
+
+```
+
+
+
+#### 1. Create config file
+
+A template for the `config.yaml` file is now provided in the `~/bias_tests_4_voice_tech/example/` folder.
+If you copied the files to a different folder you need to adjust the path to the `speaker_metadata_file` and `results_dir`.
+
+```
+    speaker_metadata_file: "~/bias_tests_4_voice_tech/example/vox1_meta.csv"
     results_dir: "~/bias_tests_4_voice_tech/results/"
 
     # for metadata
@@ -60,24 +74,18 @@ A template for the `config.yaml` file is provided in the `~/bias_tests_4_voice_t
 
 #### 2. Run the bias tests 
 
-Import `bt4vt` and access the score and config file provided as package resources. Pass the score and config file path to the `SpeakerBiastTest` class and run the `run_tests()` function.
+Import `bt4vt` and specify your score and config file. Pass the score and config file path to the `SpeakerBiastTest` class and run the `run_tests()` function.
 
 ```
-import bt4vt
-import importlib.resources
-
-with importlib.resources.path("bt4vt.data", "resnetse34v2_H-eval_scores.csv") as path:
-    score_file = str(path)
-
-with importlib.resources.path("bt4vt.data", "config.yaml") as path:
-    config_file = str(path)
+score_file = "~/bias_tests_4_voice_tech/example/resnetse34v2_H-eval_scores.csv"
+config_file = "~/bias_tests_4_voice_tech/example/config.yaml"
 
 test = bt4vt.core.SpeakerBiasTest(score_file, config_file)
 
 test.run_tests()
 ```
 
-When running the test, bt4vt will create `~/bias_tests_4_voice_tech/results` folder and store the test results there. The results file contains *metrics ratios* for the metrics and speaker groups specified in the config file. 
+Test results will be stored in `~/bias_tests_4_voice_tech/results`. The results file contains *metrics ratios* for the metrics and speaker groups specified in the config file. 
 
 The *metrics ratio* is calculated as ```speaker group metric / average metric```.
 

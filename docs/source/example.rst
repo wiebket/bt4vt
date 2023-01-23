@@ -2,19 +2,34 @@
 Example
 =======
 
-Below is an example for using ``bt4vt``. All data for reproducing the example is provided as a package resource. The example evaluates the fairness of models released with the `Clova AI VoxCeleb Trainer <https://github.com/clovaai/voxceleb_trainer>`_ benchmark.
+Below is an example for using ``bt4vt``. All data for reproducing the example can be copied by using :py:func:`bt4vt.dataio.copy_example`. The example evaluates the fairness of models released with the `Clova AI VoxCeleb Trainer <https://github.com/clovaai/voxceleb_trainer>`_ benchmark.
 
-The package resources are:
+For now, we copy the resources to ``~/bias_tests_4_voice_tech/example/``::
 
-- ``data/config.yaml`` is an example config file that is needed to run bias tests. More information on how to create a config file can be found below.
-- ``data/resnetse34v2_H-eval_scores.csv`` and ``data/resnetse34l_H-eval_scores.csv`` are the evaluation scores for two pretrained baseline models made available by the VoxCeleb Trainer. You can find more information on ResNetSE34V2 `here <https://arxiv.org/abs/2009.14153>`_ and on ResNetSE34L `here <https://doi.org/10.21437/Interspeech.2020-1064>`_.
-- ``data/vox1_meta.csv`` contains the VoxCeleb Dataset Metadata
+    import bt4vt
 
-When running the example for the first time, ``bt4vt`` will create a ``bias_tests_4_voice_tech/results`` folder in your ``home`` directory to store the results files.
+    bt4vt.dataio.copy_example("~/bias_tests_4_voice_tech/example/")
 
-| bias_tests_4_voice_tech
-| ├── results
-| │   └── biastest_results_config_resnetse34v2_H-eval_scores.csv
+
+The following files are now copied to the folder:
+
+bias_tests_4_voice_tech
+├── example
+| ├── config.yaml
+| ├── resnetse34l_H-eval_scores.csv
+| ├── resnetse34v2_H-eval_scores.csv
+| └── vox1_meta.csv
+
+- ``config.yaml`` is an example config file that is needed to run bias tests. More information on how to create a config file can be found below.
+- ``resnetse34v2_H-eval_scores.csv`` and ``resnetse34l_H-eval_scores.csv`` are the evaluation scores for two pretrained baseline models made available by the VoxCeleb Trainer. You can find more information on ResNetSE34V2 `here <https://arxiv.org/abs/2009.14153>`_ and on ResNetSE34L `here <https://doi.org/10.21437/Interspeech.2020-1064>`_.
+- ``vox1_meta.csv`` contains the VoxCeleb Dataset Metadata
+
+When running the example, ``bt4vt`` will create a ``bias_tests_4_voice_tech/results`` folder to store the results files.
+
+bias_tests_4_voice_tech
+├── example
+├── results
+│   └── biastest_results_config_resnetse34v2_H-eval_scores.csv
 
 - ``bias_tests_4_voice_tech/results/biastest_results_config_resnetse34v2_H-eval_scores.csv`` is the file where the results of the example will be saved to. It contains metrics ratios and metric results for the metrics and speaker groups specified in the config file and evaluated for ResNetSE34V2 scores.
 
@@ -25,9 +40,10 @@ _______________________________________
 1. Create config file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A template for the ``config.yaml`` file is provided as a package resource::
+A template for the ``config.yaml`` file is now provided in the ``~/bias_tests_4_voice_tech/example/`` folder.
+If you copied the files to a different folder you need to adjust the path to the ``speaker_metadata_file`` and ``results_dir``.::
 
-    speaker_metadata_file: "vox1_meta.csv"
+    speaker_metadata_file: "~/bias_tests_4_voice_tech/example/vox1_meta.csv"
     results_dir: "~/bias_tests_4_voice_tech/results/"
 
     # for metadata
@@ -57,14 +73,8 @@ Import ``bt4vt`` and access the score and config file provided as package resour
 
 Pass the score and config file path to the :py:class:`bt4vt.core.SpeakerBiasTest` class and run the :py:func:`bt4vt.core.SpeakerBiasTest.run_tests` function::
 
-    import bt4vt
-    import importlib.resources
-
-    with importlib.resources.path("bt4vt.data", "resnetse34v2_H-eval_scores.csv") as path:
-        score_file = str(path)
-
-    with importlib.resources.path("bt4vt.data", "config.yaml") as path:
-        config_file = str(path)
+    score_file = "~/bias_tests_4_voice_tech/example/resnetse34v2_H-eval_scores.csv"
+    config_file = "~/bias_tests_4_voice_tech/example/config.yaml"
 
     test = bt4vt.core.SpeakerBiasTest(score_file, config_file)
     test.run_tests()
