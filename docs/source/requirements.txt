@@ -4,4 +4,4 @@ PyYAML
 scikit_learn
 scipy
 setuptools
-importlib.resources
+importlib_resources
