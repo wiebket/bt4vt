@@ -73,21 +73,21 @@ def write_data(data, file_name):
     return
 
 
-def copy_example(directory, example_name="VoxCeleb"):
+def copy_example(dest_path, example_name="voxceleb"):
     """ Copy the example to a specified directory
 
-    :param directory: Path to the directory where you'd like to copy the example files to
-    :type directory: str
+    :param dest_path: Path to the directory where you'd like to copy the example files to
+    :type dest_path: str
     :param example_name: Name of the example that should be copied (default is VoxCeleb)
 
     """
 
-    if example_name == "VoxCeleb":
+    if example_name == "voxceleb":
 
         ref = importlib_resources.files("bt4vt.data")
         with importlib_resources.as_file(ref) as path:
-            shutil.copytree(path, directory)
-            print("Example files copied to " + directory)
+            shutil.copytree(path, os.path.expanduser(dest_path))
+            print("Example files copied to " + os.path.expanduser(dest_path))
 
 
 
