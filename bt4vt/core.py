@@ -138,7 +138,7 @@ class SpeakerBiasTest(BiasTest):
         else:
             self._dataset_eval_log_file = None
 
-        self._biastest_results_file = config_file_name + "_" + scores_file_name + ".csv"
+        self._biastest_results_file = "biastest_results_" + config_file_name + "_" + scores_file_name + ".csv"
 
     def _check_input(self, scores_input, speaker_metadata_input):
         """ Check that requirements for performing evaluation are fulfilled e.g. parameters of scores, speaker metadata and config are specified correctly
