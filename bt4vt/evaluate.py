@@ -5,7 +5,8 @@
 # @author: wiebket
 
 import sklearn.metrics as sklearn_metrics
-from .metrics import compute_eer, compute_min_cdet, compute_cdet_at_threshold
+from .metrics import compute_eer, compute_min_cdet, get_fpfn_at_threshold, get_fnthreshold_at_fp, compute_cdet_at_threshold
+import pdb
 
 
 def compute_fpfnth(scores, labels):
@@ -26,7 +27,7 @@ def compute_fpfnth(scores, labels):
     return fprs, fnrs, thresholds
 
 
-def evaluate_scores(scores, labels, dcf_costs, threshold_values=None):
+def evaluate_scores(scores, labels, fpr_values, dcf_costs, threshold_values):
     """ Evaluation of scores for the overall dataset and for specified speaker groups. In the average case no threshold_values are provided.
         Threshold values are used to compute the detection cost function for specified speaker groups.
         The function returns False Positive Rates, False Negative Rates and corresponding thresholds as well as the corresponding metric scores. In the average case, metric thresholds are returned in addition.
@@ -44,30 +45,52 @@ def evaluate_scores(scores, labels, dcf_costs, threshold_values=None):
         :rtype: ndarray, ndarray, ndarray, list, (list)
 
     """
-
+       
     fprs, fnrs, thresholds = compute_fpfnth(scores, labels)
 
     metric_scores = []
     metric_thresholds = []
 
+    keys = ["EER"]
     eer, eer_threshold = compute_eer(fprs, fnrs, thresholds)
     metric_scores.append(eer)
     metric_thresholds.append(eer_threshold)
-    # TODO: error handling check that dcf_cost is not empty
-    # this is the average case
+    
+    # `Average` evaluation case --> returns threshold for metric
     if threshold_values is None:
-        for cost in dcf_costs:
-            min_cdet, min_cdet_threshold = compute_min_cdet(fprs, fnrs, thresholds, cost[0], cost[1], cost[2])
-            metric_scores.append(min_cdet)
-            metric_thresholds.append(min_cdet_threshold)
+        if fpr_values is not None:
+            for fpr_val in fpr_values:
+                fnr_at_fpr, threshold_at_fpr = get_fnthreshold_at_fp(fprs, fnrs, thresholds, fpr_val, ppf_norm=False)
+                metric_scores.extend([fpr_val, fnr_at_fpr])
+                metric_thresholds.extend([threshold_at_fpr, threshold_at_fpr])
+                keys.extend(["FPR@fpr" + str(fpr_val), "FNR@fpr" + str(fpr_val)])
+        
+        if dcf_costs is not None:
+            for cost in dcf_costs:
+                min_cdet, min_cdet_threshold = compute_min_cdet(fprs, fnrs, thresholds, cost[0], cost[1], cost[2])
+                fpr_at_threshold, fnr_at_threshold = get_fpfn_at_threshold(fprs, fnrs, thresholds, min_cdet_threshold, ppf_norm=False)
+                metric_scores.extend([min_cdet, fpr_at_threshold, fnr_at_threshold])
+                metric_thresholds.extend([min_cdet_threshold, min_cdet_threshold, min_cdet_threshold])
+                keys.extend(["minCDet" + str(cost), "FPR@minCDet" + str(cost), "FNR@minCDet" + str(cost)])
+                
+        metric_scores_dict = dict(zip(keys, metric_scores))
+        metric_thresholds_dict = dict(zip(keys, metric_thresholds))
 
-        return fprs, fnrs, thresholds, metric_scores, metric_thresholds
-    # this is the group case
+        return fprs, fnrs, thresholds, metric_scores_dict, metric_thresholds_dict
+    
+    # Group evaluation case -> does not return threshold for metric
     else:
-        # TODO error handling check that threshold_values is length(dcf_costs) + 2 as first one refers to subgroup and second to eer
-        for index, cost in enumerate(dcf_costs):
-            cdet_at_threshold = compute_cdet_at_threshold(fprs, fnrs, thresholds, threshold_values[index + 2], cost[0],
-                                                          cost[1], cost[2])
-            metric_scores.append(cdet_at_threshold)
+        for k, v in threshold_values.items():
+            if "FPR@fpr" in k:
+                fpr_at_threshold, fnr_at_threshold = get_fpfn_at_threshold(fprs, fnrs, thresholds, v, ppf_norm=False)
+                metric_scores.extend([fpr_at_threshold, fnr_at_threshold])
+                
+            elif "FPR@minCDet" in k:
+                cost = [float(i) for i in k.split('(')[-1].split(')')[0].split(',')]
+                cdet_at_threshold = compute_cdet_at_threshold(fprs, fnrs, thresholds, v, cost[0], cost[1], cost[2])
+                fpr_at_threshold, fnr_at_threshold = get_fpfn_at_threshold(fprs, fnrs, thresholds, v, ppf_norm=False)
+                metric_scores.extend([cdet_at_threshold, fpr_at_threshold, fnr_at_threshold])
 
-        return fprs, fnrs, thresholds, metric_scores
+        metric_scores_dict = dict(zip(threshold_values.keys(), metric_scores))
+
+        return fprs, fnrs, thresholds, metric_scores_dict
