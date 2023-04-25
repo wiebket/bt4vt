@@ -167,23 +167,45 @@ def compute_cdet_at_threshold(fprs, fnrs, thresholds, threshold_value, dcf_p_tar
 #########################################
 
 class BiasMeasures:
+    """ The purpose of the BiasMeasures class is the computation of bias measures based on ratios and differences of performance metrics.
 
-    def __init__(self, metrics_df:pd.DataFrame, speaker_groups:list):
+        :param metrics: Pandas DataFrame that includes performance metrics and computed by run_tests() of SpeakerBiasTest class
+        :type metrics: DataFrame
+        :param speaker_groups: List of speaker groups as specified in config file
+        :type speaker_groups: list
+    """
+    def __init__(self, metrics, speaker_groups):
+        """
+        Constructor method
+        """
 
-        self.metrics_df = metrics_df
+        self.metrics = metrics
         self.speaker_groups = speaker_groups
 
         return
 
     def subgroup_to_average_ratio(self):
+        """
+        Computation of Subgroup to Average Ratio.
 
-        df = self.metrics_df.set_index(['speaker_group','group_category'])
+        :returns: Subgroup to Average Ratio
+        :rtype: DataFrame
+        """
+
+        df = self.metrics.set_index(['speaker_group','group_category'])
         ratios = df.loc[self.speaker_groups].div(df.loc[['average']].values[0], axis=1)
         ratios.reset_index(inplace=True)
 
         return ratios
 
     def log_subgroup_to_average_ratio(self):
+        """
+        Computation of subgroup to average ratio on a log-scale. Thereby, ln(0) is set to 0 treating a ratio of 0 in the same way as a ratio of 1, i.e. subgroup performance equals to average performance.
+        As all our metrics are error rates, a score of 0 indicates top performance. If a subgroup has a score of 0 it is not treated to perform better than average but to perform equally well.
+
+        :returns: Subgroup to Average Ratio on a log-scale
+        :rtype: DataFrame
+        """
 
         ratios = self.subgroup_to_average_ratio()
         ratios.set_index(['speaker_group','group_category'], inplace=True)
@@ -197,14 +219,26 @@ class BiasMeasures:
         return log_ratios
 
     def subgroup_to_average_difference(self):
+        """
+        Computation of subgroup to average difference.
 
-        df = self.metrics_df.set_index(['speaker_group','group_category'])
+        :returns: Subgroup to Average Difference
+        :rtype: DataFrame
+        """
+
+        df = self.metrics.set_index(['speaker_group','group_category'])
         differences = df.loc[self.speaker_groups].sub(df.loc[['average']].values[0], axis=1)
         differences.reset_index(inplace=True)
 
         return differences
 
     def absolute_subgroup_to_average_difference(self):
+        """
+        Computation of absolute subgroup to average difference.
+
+        :returns: Absolute Subgroup to Average Difference
+        :rtype: DataFrame
+        """
 
         differences = self.subgroup_to_average_difference()
         differences.set_index(['speaker_group','group_category'], inplace=True)
@@ -214,8 +248,14 @@ class BiasMeasures:
         return abs_differences
 
     def subgroup_distance_to_group_min(self):
+        """
+        Computation of subgroup distance to group minimum.
 
-        df = self.metrics_df.set_index(['speaker_group','group_category'])
+        :returns: Subgroup Distance to group minimum
+        :rtype: DataFrame
+        """
+
+        df = self.metrics.set_index(['speaker_group','group_category'])
         dist_to_min = df.loc[self.speaker_groups] - df.loc[self.speaker_groups].groupby('speaker_group').transform('min')
         dist_to_min.reset_index(inplace=True)
 
@@ -223,15 +263,27 @@ class BiasMeasures:
 
 
 # Meta-measures
-
-def fairness_discrepancy_rate(fpr_dist_to_min:pd.Series, fnr_dist_to_min:pd.Series, alpha:float):
+def fairness_discrepancy_rate(fpr_dist_to_min, fnr_dist_to_min, alpha):
     """
     This function implements the fairness discrepancy rate (FDR) measure introduced in the paper
     'Fairness in Biometrics: A Figure of Merit to Assess Biometric Verification Systems' https://doi.org/10.1109/TBIOM.2021.3102862
 
     Use BiasMeasures.subgroup_distance_to_group_min() to get fpr_dist_to_min and fnr_dist_to_min. This guarantess that distances values
-    are always positive, and no absolute value needs to be taken. Must select on threshold and one speaker_group for which to calculate the fdr.
+    are always positive, and no absolute value needs to be taken. Must select a threshold and one speaker_group for which to calculate the fdr.
+
+    :param fpr_dist_to_min: Pandas Series computed by BiasMeasures.subgroup_distance_to_group_min()
+    :type fpr_dist_to_min: Series
+    :param fnr_dist_to_min: Pandas Series computed by BiasMeasures.subgroup_distance_to_group_min()
+    :type fnr_dist_to_min: Series
+    :param alpha: Hyper-parameter which controls the weight of false matches, needs to be between 0 and 1
+    :type alpha: float
+
+    :returns: Fairness Discrepancy Rate
+    :rtype: float
     """
+
+    if (alpha <= 0.0) | (alpha >= 1.0):
+        raise Exception("Alpha needs to be between 0 and 1")
 
     max_A = max(fpr_dist_to_min)
     max_B = max(fnr_dist_to_min)
@@ -240,13 +292,24 @@ def fairness_discrepancy_rate(fpr_dist_to_min:pd.Series, fnr_dist_to_min:pd.Seri
 
     return fdr
 
-def reliability_bias(metric_log_ratios:pd.Series, norm=True, weights:pd.Series=None):
+
+def reliability_bias(metric_log_ratios, norm=True, weights=None):
     """
-    This function implements the reliablity bias measure as introduced in the paper
+    This function implements the reliability bias measure as introduced in the paper
     'Tiny, always-on and fragile: Bias propagation through design choices in on-device machine learning workflows' https://arxiv.org/abs/2201.07677
 
     Use BiasMeasures.log_subgroup_to_average_ratio() to get metric_log_ratios. Must select on metric (i.e. column) and one speaker_group
     for which to calculate reliability bias.
+
+    :param metric_log_ratios: Pandas Series computed by BiasMeasures.log_subgroup_to_average_ratio()
+    :type metric_log_ratios: Series
+    :param norm: Boolean value to compute normed reliability bias
+    :type norm: bool
+    :param weights: Pandas Series specifying the weights applied to the logarithmic ratios.
+    :type weights: Series
+
+    :returns: Reliability Bias Measure
+    :rtype: float
     """
 
     if weights is not None:
