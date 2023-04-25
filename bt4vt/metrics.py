@@ -168,17 +168,17 @@ def compute_cdet_at_threshold(fprs, fnrs, thresholds, threshold_value, dcf_p_tar
 
 class BiasMeasures:
 
-    def __init__(self, metrics_df:pd.DataFrame, group_names:list):
+    def __init__(self, metrics_df:pd.DataFrame, speaker_groups:list):
 
         self.metrics_df = metrics_df
-        self.group_names = group_names
+        self.speaker_groups = speaker_groups
 
         return
 
     def subgroup_to_average_ratio(self):
 
-        df = self.metrics_df.set_index(['group_name','group_category'])
-        ratios = df.loc[self.group_names].div(df.loc[['average']].values[0], axis=1)
+        df = self.metrics_df.set_index(['speaker_group','group_category'])
+        ratios = df.loc[self.speaker_groups].div(df.loc[['average']].values[0], axis=1)
         ratios.reset_index(inplace=True)
 
         return ratios
@@ -186,7 +186,7 @@ class BiasMeasures:
     def log_subgroup_to_average_ratio(self):
 
         ratios = self.subgroup_to_average_ratio()
-        ratios.set_index(['group_name','group_category'], inplace=True)
+        ratios.set_index(['speaker_group','group_category'], inplace=True)
 
         # NB: ln(0) = -infinity -> by replacing infinity with 0, we treat the ratio in the same way as a ratio of 1 (i.e. subgroup performance equals average performance)
         # As all our metrics are error rates, a score of 0 indicates top performance. So this approach will not account for some cases of favoritism
@@ -198,8 +198,8 @@ class BiasMeasures:
 
     def subgroup_to_average_difference(self):
 
-        df = self.metrics_df.set_index(['group_name','group_category'])
-        differences = df.loc[self.group_names].sub(df.loc[['average']].values[0], axis=1)
+        df = self.metrics_df.set_index(['speaker_group','group_category'])
+        differences = df.loc[self.speaker_groups].sub(df.loc[['average']].values[0], axis=1)
         differences.reset_index(inplace=True)
 
         return differences
@@ -207,7 +207,7 @@ class BiasMeasures:
     def absolute_subgroup_to_average_difference(self):
 
         differences = self.subgroup_to_average_difference()
-        differences.set_index(['group_name','group_category'], inplace=True)
+        differences.set_index(['speaker_group','group_category'], inplace=True)
         abs_differences = np.abs(differences)
         abs_differences.reset_index(inplace=True)
 
@@ -215,8 +215,8 @@ class BiasMeasures:
 
     def subgroup_distance_to_group_min(self):
 
-        df = self.metrics_df.set_index(['group_name','group_category'])
-        dist_to_min = df.loc[self.group_names] - df.loc[self.group_names].groupby('group_name').transform('min')
+        df = self.metrics_df.set_index(['speaker_group','group_category'])
+        dist_to_min = df.loc[self.speaker_groups] - df.loc[self.speaker_groups].groupby('speaker_group').transform('min')
         dist_to_min.reset_index(inplace=True)
 
         return dist_to_min
@@ -230,7 +230,7 @@ def fairness_discrepancy_rate(fpr_dist_to_min:pd.Series, fnr_dist_to_min:pd.Seri
     'Fairness in Biometrics: A Figure of Merit to Assess Biometric Verification Systems' https://doi.org/10.1109/TBIOM.2021.3102862
 
     Use BiasMeasures.subgroup_distance_to_group_min() to get fpr_dist_to_min and fnr_dist_to_min. This guarantess that distances values
-    are always positive, and no absolute value needs to be taken. Must select on threshold and one group_name for which to calculate the fdr.
+    are always positive, and no absolute value needs to be taken. Must select on threshold and one speaker_group for which to calculate the fdr.
     """
 
     max_A = max(fpr_dist_to_min)
@@ -245,7 +245,7 @@ def reliability_bias(metric_log_ratios:pd.Series, norm=True, weights:pd.Series=N
     This function implements the reliablity bias measure as introduced in the paper
     'Tiny, always-on and fragile: Bias propagation through design choices in on-device machine learning workflows' https://arxiv.org/abs/2201.07677
 
-    Use BiasMeasures.log_subgroup_to_average_ratio() to get metric_log_ratios. Must select on metric (i.e. column) and one group_name
+    Use BiasMeasures.log_subgroup_to_average_ratio() to get metric_log_ratios. Must select on metric (i.e. column) and one speaker_group
     for which to calculate reliability bias.
     """
 

@@ -275,17 +275,17 @@ class SpeakerBiasTest(BiasTest):
                 metrics[group][subgroup] = metric_scores
 
         metrics_list = []
-        for group_name in metrics.keys():
-            for group_category in metrics[group_name].keys():
-                m_cols = ['group_name', 'group_category'] # currently not using m_cols; should construct dict and then append to dataframe based on keys & col names
-                m = [group_name, group_category]
-                for k,v in metrics[group_name][group_category].items():
+        for speaker_group in metrics.keys():
+            for group_category in metrics[speaker_group].keys():
+                m_cols = ['speaker_group', 'group_category'] # currently not using m_cols; should construct dict and then append to dataframe based on keys & col names
+                m = [speaker_group, group_category]
+                for k,v in metrics[speaker_group][group_category].items():
                     m_cols.append(k)
                     m.append(v)
                 metrics_list.append(m)
 
         # write metrics to biastest results file
-        output = pd.DataFrame(metrics_list, columns=['group_name', 'group_category']+list(metrics['thresholds']['thresholds'].keys()))
+        output = pd.DataFrame(metrics_list, columns=['speaker_group', 'group_category']+list(metrics['thresholds']['thresholds'].keys()))
         if write_output is True:
             write_data(output, os.path.join(self.config["results_dir"], self._biastest_results_file))
             print("Bias test finished. Results saved to " + self.config["results_dir"]+self._biastest_results_file)
