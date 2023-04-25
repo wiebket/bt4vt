@@ -79,6 +79,16 @@ class SpeakerBiasTest(BiasTest):
         else:
             self.id_delimiter = self.config["id_delimiter"]
 
+        try:
+            self.config["dcf_costs"]
+        except KeyError:
+            self.config["dcf_costs"] = None
+
+        try:
+            self.config["fpr_values"]
+        except KeyError:
+            self.config["fpr_values"] = None
+
         scores_input = load_data(scores)
         speaker_metadata_input = load_data(self.config['speaker_metadata_file'])
 
@@ -166,6 +176,9 @@ class SpeakerBiasTest(BiasTest):
         if not all(isinstance(el, list) for el in self.config["speaker_groups"]):
             raise ValueError("Speaker Groups in config file must be a list of lists")
 
+        if (self.config["dcf_costs"] is None) & (self.config["fpr_values"] is None):
+            raise KeyError("Neither DCF Costs nor FPR Values are specified in config file")
+
         speaker_group_list = [speaker_group for group_sublist in self.config["speaker_groups"] for speaker_group in group_sublist]
         speaker_group_list = np.unique(speaker_group_list)
         for speaker_group in speaker_group_list:
@@ -176,9 +189,10 @@ class SpeakerBiasTest(BiasTest):
                 sys.exit(1)
 
         # check if dcf costs PTarget is between 0 and 1
-        for dcf_costs in self.config["dcf_costs"]:
-            if (dcf_costs[0] <= 0.0) | (dcf_costs[0] >= 1.0):
-                raise Exception("PTarget in DCF Costs needs to be between 0 and 1")
+        if self.config["dcf_costs"] is not None:
+            for dcf_costs in self.config["dcf_costs"]:
+                if (dcf_costs[0] <= 0.0) | (dcf_costs[0] >= 1.0):
+                    raise Exception("PTarget in DCF Costs needs to be between 0 and 1")
 
         # TODO check if fpr values are in range
 
@@ -248,7 +262,7 @@ class SpeakerBiasTest(BiasTest):
         metrics['average'] = {'average': metric_scores_dict}
 
         # Calculate metrics for each group at the 'average' thresholds
-        self.scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'])
+        self.scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'], self.id_delimiter)
         for group in self.scores_by_speaker_groups:
             metrics[group] = dict()
             for subgroup in self.scores_by_speaker_groups[group]:
