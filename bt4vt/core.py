@@ -141,7 +141,7 @@ class SpeakerBiasTest(BiasTest):
         """
 
         # check config file
-        # check fpr_values (float) and dcf_costs (list of lists)
+        # TODO: check fpr_values (float) and dcf_costs (list of lists)
         try:
             self.config["id_column"]
         except KeyError:
@@ -155,9 +155,9 @@ class SpeakerBiasTest(BiasTest):
             sys.exit(1)
 
         try:
-            self.config["group_names"]
+            self.config["speaker_groups"]
         except KeyError:
-            print("Error: group_names not specified in config file")
+            print("Error: speaker_groups not specified in config file")
             sys.exit(1)
 
         if not isinstance(self.config["select_columns"], list):
@@ -179,6 +179,8 @@ class SpeakerBiasTest(BiasTest):
         for dcf_costs in self.config["dcf_costs"]:
             if (dcf_costs[0] <= 0.0) | (dcf_costs[0] >= 1.0):
                 raise Exception("PTarget in DCF Costs needs to be between 0 and 1")
+
+        # TODO check if fpr values are in range
 
         # check scores_input
         try:
@@ -246,7 +248,7 @@ class SpeakerBiasTest(BiasTest):
         metrics['average'] = {'average': metric_scores_dict}
 
         # Calculate metrics for each group at the 'average' thresholds
-        self.scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['group_names'])
+        self.scores_by_speaker_groups = split_scores_by_speaker_groups(self.scores, self.speaker_metadata, self.config['speaker_groups'])
         for group in self.scores_by_speaker_groups:
             metrics[group] = dict()
             for subgroup in self.scores_by_speaker_groups[group]:
