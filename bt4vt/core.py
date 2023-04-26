@@ -268,9 +268,12 @@ class SpeakerBiasTest(BiasTest):
             for subgroup in self.scores_by_speaker_groups[group]:
                 label_score_list = self.scores_by_speaker_groups[group][subgroup]
                 labels, scores = zip(*label_score_list)
-                if any(np.isnan(labels)) or any(np.isnan(scores)):
-                    continue
-                fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['fpr_values'], self.config['dcf_costs'],
+                if all(np.isnan(labels)) or all(np.isnan(scores)):
+                    metric_scores = metric_scores_dict.copy()
+                    for key in metric_scores:
+                        metric_scores[key] = np.nan
+                else:
+                    fprs, fnrs, thresholds, metric_scores = evaluate_scores(scores, labels, self.config['fpr_values'], self.config['dcf_costs'],
                                                                         threshold_values=metrics['thresholds']['thresholds'])
                 metrics[group][subgroup] = metric_scores
 
