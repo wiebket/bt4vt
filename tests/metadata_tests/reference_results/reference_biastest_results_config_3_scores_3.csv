@@ -2,3 +2,4 @@ speaker_group,group_category,EER,"minCDet(0.05, 1, 1)","FPR@minCDet(0.05, 1, 1)"
 thresholds,thresholds,-1.0756698846817017,-1.0756698846817017,-1.0756698846817017,-1.0756698846817017
 average,average,0.0,0.0,0.0,0.0
 Gender,m,0.0,0.0,0.0,0.0
+
